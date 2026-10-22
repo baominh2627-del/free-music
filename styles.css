@@ -133,3 +133,6 @@ body{background:var(--bg);color:var(--text)}
   .admin-form input{min-height:48px;font-size:15px}
   .admin-note{font-size:12px}
 }
+
+#repeat-button.active,#full-repeat.active{color:#fff!important;-webkit-text-fill-color:#fff;-webkit-text-stroke:.55px currentColor;font-weight:900;background:#b64f7a;box-shadow:0 0 0 4px #b64f7a24;border-radius:50%}
+#full-repeat.active{width:48px;height:48px;display:grid;place-items:center;transform:scale(1.08)}
