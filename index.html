@@ -37,7 +37,7 @@
         <div class="topbar-search" id="topbar-search"><span>⌕</span><input id="search-input" type="search" placeholder="Tìm bài hát trong thư viện" autocomplete="off" /></div>
         <button class="install-button" id="install-button" hidden>↓ <span>Cài ứng dụng</span></button>
         <button class="admin-button" id="admin-button">↑ Đăng nhạc</button>
-        <button class="profile-button" aria-label="Pink Tune">PT</button>
+        <button class="profile-button" id="profile-button" data-view="profile" aria-label="Trang cá nhân" title="Trang cá nhân">PT</button>
       </header>
 
       <section class="view active" id="view-home">
@@ -76,6 +76,37 @@
       <section class="view" id="view-search">
         <div class="page-heading"><p class="eyebrow">TÌM KIẾM</p><h1>Thư viện của bạn</h1><p class="muted">Tìm theo tên bài hát hoặc nghệ sĩ.</p></div>
         <div class="search-results" id="search-results"><div class="empty-state compact"><div class="empty-icon">⌕</div><h3>Tìm bài hát</h3><p>Kết quả sẽ xuất hiện khi bạn nhập từ khóa.</p></div></div>
+      </section>
+
+      <section class="view profile-view" id="view-profile">
+        <div class="page-heading profile-page-heading"><p class="eyebrow">TÀI KHOẢN PINK TUNE</p><h1>Trang cá nhân</h1><p class="muted">Thông tin tài khoản và quyền sử dụng của bạn.</p></div>
+        <section class="profile-hero" aria-labelledby="profile-name">
+          <div class="profile-avatar-large" id="profile-large-avatar" aria-hidden="true">PT</div>
+          <div class="profile-identity"><span class="profile-role-badge" id="profile-role">Khách</span><h2 id="profile-name">Người nghe Pink Tune</h2><p id="profile-email">Chưa đăng nhập</p></div>
+        </section>
+        <div class="profile-grid">
+          <article class="profile-card">
+            <p class="eyebrow">TÀI KHOẢN</p><h2>Quyền sử dụng</h2>
+            <p id="profile-permission-note" class="profile-note">Bạn có thể nghe nhạc và lưu thư viện riêng trên thiết bị này.</p>
+            <button class="primary-button profile-action" id="profile-login" type="button">Đăng nhập tài khoản</button>
+            <button class="primary-button profile-action" id="profile-upload" type="button" hidden>↑ Đăng nhạc cộng đồng</button>
+            <button class="secondary-button profile-action" id="profile-signout" type="button" hidden>Đăng xuất</button>
+          </article>
+          <article class="profile-card">
+            <p class="eyebrow">THƯ VIỆN CỦA BẠN</p><h2>Âm nhạc cá nhân</h2>
+            <div class="profile-stats">
+              <button class="profile-stat" data-view="library" type="button"><b id="profile-local-count">0</b><span>Bài hát trên thiết bị</span><small>Mở thư viện →</small></button>
+              <button class="profile-stat" data-view="liked" type="button"><b id="profile-liked-count">0</b><span>Bài hát đã thích</span><small>Mở danh sách →</small></button>
+            </div>
+          </article>
+        </div>
+        <section class="profile-card profile-admin-tools" id="profile-admin-tools" hidden>
+          <div><p class="eyebrow">KHU VỰC QUẢN TRỊ</p><h2>Công cụ quản trị</h2><p class="profile-note">Các liên kết này chỉ hiển thị với tài khoản quản trị viên.</p></div>
+          <div class="profile-admin-actions">
+            <a class="secondary-button profile-action" href="https://supabase.com/dashboard/project/bwngunlfuocytgmqnvxa/editor/17619?schema=public" target="_blank" rel="noopener noreferrer">📂 Mở Table Editor ↗</a>
+            <button class="primary-button profile-action" id="profile-admin-upload" type="button">↑ Mở Pink Tune Studio</button>
+          </div>
+        </section>
       </section>
 
       <footer class="app-footer">Pink Tune phát các tệp nhạc bạn thêm vào. Hãy dùng nội dung bạn có quyền sử dụng.</footer>
