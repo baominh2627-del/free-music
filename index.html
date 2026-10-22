@@ -24,11 +24,13 @@
         <button class="nav-link active" data-view="home"><span class="nav-icon">⌂</span>Trang chủ</button>
         <button class="nav-link" data-view="search"><span class="nav-icon">⌕</span>Tìm trong thư viện</button>
         <button class="nav-link" data-view="library"><span class="nav-icon">▤</span>Thư viện nhạc</button>
+        <button class="nav-link" data-view="playlists"><span class="nav-icon">♫</span>Danh sách phát</button>
       </nav>
       <div class="sidebar-rule"></div>
       <div class="library-heading"><span>NHẠC CỦA BẠN</span><button id="sidebar-import" class="add-button" aria-label="Thêm nhạc">＋</button></div>
       <button class="collection-link" data-view="liked"><span class="liked-tile">♥</span><span><b>Bài hát đã thích</b><small id="liked-count">0 bài hát</small></span></button>
       <button class="collection-link" data-view="library"><span class="folder-tile">♫</span><span><b>Tệp nhạc của tôi</b><small id="library-count">Chưa có bài hát</small></span></button>
+      <button class="collection-link" data-view="playlists"><span class="folder-tile playlist-tile">▤</span><span><b>Danh sách phát</b><small>Nhạc theo sở thích</small></span></button>
       <div class="sidebar-bottom"><span class="status-dot"></span><span>Nhạc cá nhân &amp; cộng đồng</span></div>
     </aside>
 
@@ -38,7 +40,7 @@
         <div class="topbar-search" id="topbar-search"><span>⌕</span><input id="search-input" type="search" placeholder="Tìm bài hát trong thư viện" autocomplete="off" /></div>
         <button class="install-button" id="install-button" hidden>↓ <span>Cài ứng dụng</span></button>
         <button class="admin-button" id="admin-button">↑ Đăng nhạc</button>
-        <button class="profile-button" id="profile-button" data-view="profile" aria-label="Trang cá nhân" title="Trang cá nhân">PT</button>
+        <button class="profile-button" id="profile-button" data-view="profile" aria-label="Trang cá nhân" title="Trang cá nhân"><img id="profile-button-image" alt="" hidden /><span id="profile-button-initials">PT</span></button>
       </header>
 
       <section class="view active" id="view-home">
@@ -52,10 +54,13 @@
         <div class="track-list" id="recent-list"></div>
         <div class="section-heading liked-heading"><div><h2>Đã thích</h2><p class="muted">Lưu những bài hát bạn muốn nghe lại</p></div><button class="text-button" data-view="liked">Xem tất cả →</button></div>
         <div class="track-list" id="liked-preview"></div>
+        <div class="section-heading recommendation-heading"><div><h2>Dành cho bạn</h2><p class="muted">Gợi ý theo bài hát bạn thích và nghe gần đây</p></div><button class="text-button" data-view="playlists">Danh sách phát →</button></div>
+        <div class="track-list recommendation-list" id="recommendation-list"></div>
       </section>
 
       <section class="view" id="view-library">
         <div class="page-heading"><p class="eyebrow">BỘ SƯU TẬP</p><h1>Thư viện nhạc</h1><p class="muted">Quản lý và phát những tệp âm thanh đã thêm.</p></div>
+        <section class="library-playlist-shortcut"><div><p class="eyebrow">THEO SỞ THÍCH CỦA BẠN</p><h2>Danh sách phát</h2><p class="muted">Nghe gợi ý cá nhân hoặc tự tạo playlist.</p></div><button class="primary-button" data-view="playlists">Mở danh sách →</button></section>
         <div class="library-toolbar"><div class="toolbar-left"><button class="primary-button" id="library-import">＋ Thêm bài hát</button><button class="secondary-button folder-import" id="folder-import">▣ Thêm thư mục</button></div><span class="muted" id="library-total">0 bài hát</span></div>
         <div class="library-section-heading"><div><p class="eyebrow">SẮP XẾP</p><h2 id="folder-section-title">Thư mục nhạc</h2></div><button class="text-button" id="show-all-folders" hidden>← Tất cả thư mục</button></div>
         <div class="folder-grid" id="folder-grid"></div>
@@ -65,6 +70,17 @@
         <div class="library-section-heading community-library-heading" id="community-library-heading" hidden><div><p class="eyebrow">NGHE CÙNG MỌI NGƯỜI</p><h2>Nhạc cộng đồng</h2></div><span class="muted" id="community-count"></span></div>
         <div class="track-list full-list community-list" id="community-library-list" hidden></div>
         <div class="empty-state community-empty" id="community-empty" hidden><h3>Chưa có nhạc chia sẻ</h3><p>Nhạc cộng đồng sẽ xuất hiện sau khi quản trị viên đăng bài hát.</p></div>
+      </section>
+
+      <section class="view playlists-view" id="view-playlists">
+        <div class="page-heading"><p class="eyebrow">TUYỂN CHỌN ÂM NHẠC</p><h1>Danh sách phát</h1><p class="muted">Gợi ý theo những bài bạn yêu thích và thường nghe.</p></div>
+        <div class="playlist-page-toolbar"><span class="muted">Danh sách phát của bạn</span><button class="primary-button" id="new-playlist-button" type="button">＋ Tạo danh sách</button></div>
+        <div class="playlist-grid" id="playlist-grid"></div>
+        <section class="playlist-detail" id="playlist-detail" hidden>
+          <div class="playlist-detail-heading"><div><p class="eyebrow">ĐANG CHỌN</p><h2 id="playlist-detail-heading">Dành cho bạn</h2><p class="muted" id="playlist-detail-count"></p></div><div class="playlist-detail-actions"><button class="secondary-button" id="playlist-add-toggle" type="button">＋ Thêm bài</button><button class="secondary-button" id="playlist-detail-delete" type="button" hidden>Xóa danh sách</button><button class="play-all-button large-play" id="playlist-detail-play" type="button" aria-label="Phát danh sách">▶</button></div></div>
+          <div class="playlist-add-picker" id="playlist-add-picker" hidden></div>
+          <div class="track-list full-list" id="playlist-detail-list"></div>
+        </section>
       </section>
 
       <section class="view" id="view-liked">
@@ -82,7 +98,7 @@
       <section class="view profile-view" id="view-profile">
         <div class="page-heading profile-page-heading"><p class="eyebrow">TÀI KHOẢN PINK TUNE</p><h1>Trang cá nhân</h1><p class="muted">Thông tin tài khoản và quyền sử dụng của bạn.</p></div>
         <section class="profile-hero" aria-labelledby="profile-name">
-          <div class="profile-avatar-large" id="profile-large-avatar" aria-hidden="true">PT</div>
+          <div class="profile-avatar-large" id="profile-large-avatar" aria-hidden="true"><img id="profile-large-avatar-image" alt="" hidden /><span id="profile-large-avatar-initials">PT</span></div>
           <div class="profile-identity"><span class="profile-role-badge" id="profile-role">Khách</span><h2 id="profile-name">Người nghe Pink Tune</h2><p id="profile-email">Chưa đăng nhập</p></div>
         </section>
         <div class="profile-grid">
@@ -101,6 +117,13 @@
             </div>
           </article>
         </div>
+        <form class="profile-card profile-edit-form" id="profile-edit-form" hidden>
+          <p class="eyebrow">HỒ SƠ CÔNG KHAI</p><h2>Ảnh đại diện tài khoản</h2>
+          <p class="profile-note">Tên và ảnh này sẽ hiện cạnh bài hát bạn đăng để mọi người cùng thấy.</p>
+          <label>Tên hiển thị<input id="profile-display-name" type="text" minlength="2" maxlength="60" autocomplete="nickname" required /></label>
+          <label>Chọn ảnh JPG, PNG hoặc WebP, tối đa 5 MB<input id="profile-avatar-file" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+          <button class="primary-button profile-action" id="profile-save-button" type="submit">Lưu hồ sơ</button>
+        </form>
         <section class="profile-card profile-admin-tools" id="profile-admin-tools" hidden>
           <div><p class="eyebrow">KHU VỰC QUẢN TRỊ</p><h2>Công cụ quản trị</h2><p class="profile-note">Các liên kết này chỉ hiển thị với tài khoản quản trị viên.</p></div>
           <div class="profile-admin-actions">
@@ -115,14 +138,14 @@
   </div>
 
   <section class="player-bar" aria-label="Trình phát nhạc">
-    <div class="now-playing-block"><button class="now-playing" id="open-now-playing" aria-label="Mở trình phát toàn màn hình"><div class="cover-art" id="player-cover"><span>♫</span></div><span class="track-meta"><b id="player-title">Chưa phát nhạc</b><span id="player-artist">Thêm nhạc từ thiết bị để bắt đầu</span></span></button><button class="heart-button" id="player-like" aria-label="Thích bài hát">♡</button></div>
+    <div class="now-playing-block"><button class="now-playing" id="open-now-playing" aria-label="Mở trình phát toàn màn hình"><div class="cover-art" id="player-cover"><span>♫</span><img id="player-cover-image" alt="" hidden /></div><span class="track-meta"><b id="player-title">Chưa phát nhạc</b><span id="player-artist">Thêm nhạc từ thiết bị để bắt đầu</span></span></button><button class="heart-button" id="player-like" aria-label="Thích bài hát">♡</button></div>
     <div class="playback"><div class="playback-controls"><button class="control-button" id="shuffle-button" aria-label="Phát ngẫu nhiên">⤨</button><button class="control-button" id="previous-button" aria-label="Bài trước">|‹</button><button class="main-play-button" id="toggle-play" aria-label="Phát nhạc">▶</button><button class="control-button" id="next-button" aria-label="Bài tiếp">›|</button><button class="control-button" id="repeat-button" aria-label="Lặp lại" aria-pressed="false">↻</button></div><div class="progress-row"><span id="current-time">0:00</span><input id="seek-bar" type="range" min="0" max="1000" value="0" aria-label="Vị trí phát"><span id="duration">0:00</span></div></div>
     <div class="player-extra"><button class="control-button queue-button" id="queue-button" aria-label="Mở hàng đợi">☷</button><span class="volume-icon">◖))</span><input id="volume-bar" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Âm lượng"></div>
   </section>
 
   <section class="now-playing-screen" id="now-playing-screen" aria-label="Đang phát" aria-hidden="true" hidden>
     <header class="now-playing-header"><button class="player-close" id="close-now-playing" aria-label="Thu nhỏ trình phát">⌄</button><div><small>ĐANG PHÁT TỪ THƯ VIỆN</small><b>Pink Tune</b></div><button class="player-menu" id="full-queue" aria-label="Mở hàng đợi">•••</button></header>
-    <div class="album-art-large" id="full-cover"><span>♫</span></div>
+    <div class="album-art-large" id="full-cover"><span>♫</span><img id="full-cover-image" alt="" hidden /></div>
     <div class="full-track-info"><div><h2 id="full-title">Chưa phát nhạc</h2><p id="full-artist">Thêm nhạc từ thiết bị để bắt đầu</p></div><button class="heart-button" id="full-like" aria-label="Thích bài hát">♡</button></div>
     <div class="full-progress"><input id="full-seek" type="range" min="0" max="1000" value="0" aria-label="Vị trí phát"><div><span id="full-current-time">0:00</span><span id="full-duration">0:00</span></div></div>
     <div class="full-controls"><button id="full-shuffle" class="control-button" aria-label="Phát ngẫu nhiên">⤨</button><button id="full-previous" class="control-button" aria-label="Bài trước">|‹</button><button id="full-toggle-play" class="full-play-button" aria-label="Phát nhạc">▶</button><button id="full-next" class="control-button" aria-label="Bài tiếp">›|</button><button id="full-repeat" class="control-button" aria-label="Lặp lại" aria-pressed="false">↻</button></div>
@@ -139,6 +162,7 @@
   <input id="file-input" type="file" accept="audio/*,.flac,.mp3,.m4a,.aac,.wav,.ogg,.opus" multiple hidden />
   <input id="folder-input" type="file" accept="audio/*,.flac,.mp3,.m4a,.aac,.wav,.ogg,.opus" webkitdirectory directory multiple hidden />
   <div class="toast" id="toast" role="status"></div>
+  <dialog id="create-playlist-dialog" class="queue-dialog playlist-create-dialog"><div class="dialog-heading"><div><p class="eyebrow">THƯ VIỆN CÁ NHÂN</p><h2>Tạo danh sách phát</h2></div><button class="round-button" id="close-create-playlist" aria-label="Đóng">×</button></div><form id="create-playlist-form" class="admin-form"><label>Tên danh sách<input id="new-playlist-name" type="text" maxlength="60" required placeholder="Ví dụ: Nhạc thư giãn" /></label><p class="muted">Danh sách lưu trên thiết bị này và thuộc tài khoản đang dùng.</p><button class="primary-button" type="submit">Tạo danh sách</button></form></dialog>
   <dialog id="queue-dialog" class="queue-dialog"><div class="dialog-heading"><div><p class="eyebrow">ĐANG PHÁT</p><h2>Hàng đợi</h2></div><button class="round-button" id="close-queue" aria-label="Đóng">×</button></div><div id="queue-list" class="track-list"></div><div class="empty-state compact" id="queue-empty"><p>Phát một bài hát để tạo hàng đợi.</p></div></dialog>
   <dialog id="admin-dialog" class="admin-dialog">
     <div class="dialog-heading"><div><p class="eyebrow">PINK TUNE STUDIO</p><h2>Đăng nhạc cho mọi người</h2></div><button class="round-button" id="close-admin" aria-label="Đóng">×</button></div>
@@ -166,6 +190,7 @@
       <label>Tên bài hát<input id="upload-title" type="text" maxlength="160" required placeholder="Ví dụ: Bản nhạc mùa hè" /></label>
       <label>Nghệ sĩ<input id="upload-artist" type="text" maxlength="120" required placeholder="Tên nghệ sĩ" /></label>
       <label>Tệp âm thanh<input id="shared-audio-file" type="file" accept="audio/*,.flac,.mp3,.m4a,.aac,.wav,.ogg,.opus" required /></label>
+      <label>Ảnh bìa bài hát (tùy chọn)<input id="shared-cover-file" type="file" accept="image/jpeg,image/png,image/webp" /><small>Ảnh JPG, PNG hoặc WebP, tối đa 5 MB. Mọi người sẽ thấy ảnh này.</small></label>
       <p class="admin-note">Chỉ đăng nhạc bạn có quyền chia sẻ công khai. Tệp giới hạn 50 MB.</p>
       <button class="primary-button" type="submit" id="upload-submit">↑ Tải lên thư viện chung</button>
       <button class="text-button signout-button" type="button" id="admin-signout">Đăng xuất</button>

@@ -1,13 +1,14 @@
 # Bật thư viện nhạc chung cho Pink Tune
 
-Pink Tune đang chạy trên GitHub Pages nên không thể tự nhận tệp tải lên và lưu cho mọi người. Phần thư viện chung dùng Supabase Storage để giữ tệp âm thanh và Supabase Database để lưu tên bài/nghệ sĩ. Người nghe chỉ có quyền đọc; đăng tải được giới hạn cho tài khoản quản trị.
+Pink Tune đang chạy trên GitHub Pages nên không thể tự nhận tệp tải lên và lưu cho mọi người. Phần thư viện chung dùng Supabase Storage để giữ tệp âm thanh/ảnh và Supabase Database để lưu bài hát, ảnh đại diện công khai. Người nghe chỉ có quyền đọc; đăng tải được giới hạn cho tài khoản có quyền.
 
 ## 1. Tạo dự án và kho âm thanh
 
 1. Tạo một project tại [Supabase](https://supabase.com/dashboard).
 2. Trong **Storage**, tạo bucket `pink-tune-music`, bật **Public bucket**, đặt giới hạn tệp 50 MB.
 3. Trong **SQL Editor**, chạy toàn bộ nội dung `supabase/schema.sql`.
-4. Trong phần **API Settings**, giữ schema `public` trong danh sách exposed schemas để app đọc catalog qua Data API.
+4. Với project đã cài schema cũ, chạy thêm `supabase/community-profile-media.sql` trong SQL Editor để thêm cột ảnh bìa, hồ sơ công khai và quyền tải ảnh đại diện.
+5. Trong phần **API Settings**, giữ schema `public` trong danh sách exposed schemas để app đọc catalog qua Data API.
 
 Bucket public cho phép mọi người nghe tệp qua URL. Tài khoản quản trị và tài khoản đăng nhạc được cấp quyền riêng mới có thể tải tệp lên. Không tải nhạc mà bạn không có quyền chia sẻ công khai.
 
@@ -46,7 +47,9 @@ window.PINK_TUNE_CONFIG = {
 
 Publishable key được dùng trong trình duyệt và không phải service-role key. Không đặt `service_role` hoặc secret key trong mã frontend. Row Level Security trong `schema.sql` giới hạn đọc/tải lên.
 
-Sau khi commit và push cấu hình, mở Pink Tune, chọn **↑ Đăng nhạc**, đăng nhập bằng tài khoản quản trị, nhập tên bài/nghệ sĩ rồi chọn tệp và tải lên. Bài hát sẽ xuất hiện ở mục **Nhạc cộng đồng** trên các máy mở trang.
+Sau khi commit và push cấu hình, mở Pink Tune, chọn **↑ Đăng nhạc**, đăng nhập bằng tài khoản có quyền, nhập tên bài/nghệ sĩ, chọn tệp âm thanh và có thể chọn ảnh bìa rồi tải lên. Ảnh đại diện được chỉnh trong **Trang cá nhân** sau khi đăng nhập. Bài hát, ảnh bìa và tên/ảnh hồ sơ người đăng sẽ hiển thị trong **Nhạc cộng đồng** trên các máy mở app.
+
+Mục **Danh sách phát → Dành cho bạn** xếp nhạc theo bài đã thích và lịch sử nghe. Playlist bạn tự tạo được lưu trên thiết bị hiện tại; thư viện này chưa đồng bộ playlist giữa nhiều thiết bị.
 
 ## Ghi chú
 
