@@ -35,10 +35,11 @@
         <div class="history-controls"><button aria-label="Quay lại" class="round-button" id="back-button">‹</button><button aria-label="Tiến tới" class="round-button" id="forward-button">›</button></div>
         <div class="topbar-search" id="topbar-search"><span>⌕</span><input id="search-input" type="search" placeholder="Tìm bài hát trong thư viện" autocomplete="off" /></div>
         <button class="install-button" id="install-button" hidden>↓ <span>Cài ứng dụng</span></button>
-        <button class="profile-button" aria-label="Thông tin ứng dụng">GĐ</button>
+        <button class="profile-button" aria-label="Pink Tune">PT</button>
       </header>
 
       <section class="view active" id="view-home">
+        <div class="mobile-home-filters" aria-label="Lối tắt thư viện"><button class="mobile-filter active" data-view="home">Tất cả</button><button class="mobile-filter" data-view="library">Bài hát</button><button class="mobile-filter" data-view="liked">Đã thích</button><button class="mobile-filter import-filter" id="quick-import" aria-label="Thêm nhạc">＋</button></div>
         <div class="welcome-row"><div><p class="eyebrow">ÂM NHẠC CỦA RIÊNG BẠN</p><h1>Chào bạn <span>✳</span></h1><p class="muted">Mang những giai điệu yêu thích theo bạn mọi lúc.</p></div><button class="primary-button" id="import-hero">＋ <span>Thêm nhạc từ điện thoại</span></button></div>
         <div class="feature-card"><div class="feature-copy"><span class="feature-tag">NGHE THEO CÁCH CỦA BẠN</span><h2>Thư viện nhạc.<br/>Không giới hạn.</h2><p>Thêm tệp âm thanh của bạn để nghe ngoại tuyến, phát nền và tự do tạo hàng đợi.</p><button class="feature-button" id="feature-import">Chọn nhạc <span>→</span></button></div><div class="feature-art" aria-hidden="true"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-disc"><div class="disc-label">♪</div></div><div class="art-spark spark-one">✳</div><div class="art-spark spark-two">✦</div></div></div>
         <div class="section-heading"><div><h2>Nghe gần đây</h2><p class="muted">Những bài hát trong thư viện của bạn</p></div><button class="text-button" data-view="library">Xem thư viện →</button></div>
@@ -75,9 +76,18 @@
   </div>
 
   <section class="player-bar" aria-label="Trình phát nhạc">
-    <div class="now-playing"><div class="cover-art" id="player-cover"><span>♫</span></div><div class="track-meta"><b id="player-title">Chưa phát nhạc</b><span id="player-artist">Thêm nhạc từ thiết bị để bắt đầu</span></div><button class="heart-button" id="player-like" aria-label="Thích bài hát">♡</button></div>
+    <div class="now-playing-block"><button class="now-playing" id="open-now-playing" aria-label="Mở trình phát toàn màn hình"><div class="cover-art" id="player-cover"><span>♫</span></div><span class="track-meta"><b id="player-title">Chưa phát nhạc</b><span id="player-artist">Thêm nhạc từ thiết bị để bắt đầu</span></span></button><button class="heart-button" id="player-like" aria-label="Thích bài hát">♡</button></div>
     <div class="playback"><div class="playback-controls"><button class="control-button" id="shuffle-button" aria-label="Phát ngẫu nhiên">⤨</button><button class="control-button" id="previous-button" aria-label="Bài trước">|‹</button><button class="main-play-button" id="toggle-play" aria-label="Phát nhạc">▶</button><button class="control-button" id="next-button" aria-label="Bài tiếp">›|</button><button class="control-button" id="repeat-button" aria-label="Lặp lại">↻</button></div><div class="progress-row"><span id="current-time">0:00</span><input id="seek-bar" type="range" min="0" max="1000" value="0" aria-label="Vị trí phát"><span id="duration">0:00</span></div></div>
     <div class="player-extra"><button class="control-button queue-button" id="queue-button" aria-label="Mở hàng đợi">☷</button><span class="volume-icon">◖))</span><input id="volume-bar" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Âm lượng"></div>
+  </section>
+
+  <section class="now-playing-screen" id="now-playing-screen" aria-label="Đang phát" aria-hidden="true" hidden>
+    <header class="now-playing-header"><button class="player-close" id="close-now-playing" aria-label="Thu nhỏ trình phát">⌄</button><div><small>ĐANG PHÁT TỪ THƯ VIỆN</small><b>Pink Tune</b></div><button class="player-menu" id="full-queue" aria-label="Mở hàng đợi">•••</button></header>
+    <div class="album-art-large" id="full-cover"><span>♫</span></div>
+    <div class="full-track-info"><div><h2 id="full-title">Chưa phát nhạc</h2><p id="full-artist">Thêm nhạc từ thiết bị để bắt đầu</p></div><button class="heart-button" id="full-like" aria-label="Thích bài hát">♡</button></div>
+    <div class="full-progress"><input id="full-seek" type="range" min="0" max="1000" value="0" aria-label="Vị trí phát"><div><span id="full-current-time">0:00</span><span id="full-duration">0:00</span></div></div>
+    <div class="full-controls"><button id="full-shuffle" class="control-button" aria-label="Phát ngẫu nhiên">⤨</button><button id="full-previous" class="control-button" aria-label="Bài trước">|‹</button><button id="full-toggle-play" class="full-play-button" aria-label="Phát nhạc">▶</button><button id="full-next" class="control-button" aria-label="Bài tiếp">›|</button><button id="full-repeat" class="control-button" aria-label="Lặp lại">↻</button></div>
+    <div class="full-player-footer"><span>♫ <span id="full-queue-label">Hàng đợi hiện tại</span></span><button id="full-open-queue" aria-label="Mở hàng đợi">☷</button></div>
   </section>
 
   <nav class="mobile-nav" aria-label="Điều hướng chính trên điện thoại">
