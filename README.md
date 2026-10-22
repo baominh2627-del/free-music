@@ -8,6 +8,8 @@ Muốn bật tải nhạc lên thư viện chung để mọi người cùng nghe
 
 Ứng dụng web cần được mở từ địa chỉ HTTPS để trình duyệt cho phép cài đặt và lưu ứng dụng ngoại tuyến. Đưa thư mục này lên một máy chủ web HTTPS (ví dụ GitHub Pages), mở đường dẫn trên Chrome Android, rồi chọn **Cài ứng dụng** hoặc **Thêm vào màn hình chính** trong menu trình duyệt. Không cần Play Store.
 
+Muốn cài bằng file APK, tải [Pink Tune APK mới nhất](https://github.com/baominh2627-del/free-music/releases/latest/download/Pink-Tune.apk) trên điện thoại Android, mở file vừa tải và xác nhận cài đặt. GitHub Actions tạo APK sau mỗi lần cập nhật mã app lên nhánh `main`.
+
 Để chạy thử trên máy tính, mở thư mục này bằng máy chủ tĩnh cục bộ, ví dụ `npx serve .`, sau đó truy cập địa chỉ hiện ra. Tính năng cài đặt yêu cầu HTTPS hoặc localhost.
 
 ## Dùng ứng dụng
