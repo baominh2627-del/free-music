@@ -1,14 +1,14 @@
 {
   "id": "/",
-  "name": "Giai Điệu — Nhạc của bạn",
-  "short_name": "Giai Điệu",
-  "description": "Trình phát nhạc cá nhân miễn phí, nghe ngoại tuyến và chạy khi khóa màn hình.",
+  "name": "Pink Tune — Your music",
+  "short_name": "Pink Tune",
+  "description": "Trình phát nhạc cá nhân với giao diện hồng pastel, nghe ngoại tuyến và chạy nền.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#10120f",
-  "theme_color": "#10120f",
+  "background_color": "#fff4f8",
+  "theme_color": "#fff4f8",
   "icons": [
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]

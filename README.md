@@ -1,6 +1,6 @@
-# Giai Điệu
+# Pink Tune
 
-Giai Điệu là trình phát nhạc cá nhân miễn phí, cài như ứng dụng trên Android và hỗ trợ phát nền qua trình duyệt. Ứng dụng phát tệp âm thanh do người dùng thêm vào; dự án không bao gồm nhạc thương mại, tài khoản Spotify, hoặc nguồn stream không có giấy phép.
+Pink Tune là trình phát nhạc cá nhân miễn phí với giao diện hồng pastel, cài như ứng dụng trên Android và hỗ trợ phát nền qua trình duyệt. Ứng dụng phát tệp âm thanh do người dùng thêm vào; dự án không bao gồm nhạc thương mại, tài khoản Spotify, hoặc nguồn stream không có giấy phép.
 
 ## Cài trên điện thoại Android
 
@@ -14,7 +14,7 @@ Giai Điệu là trình phát nhạc cá nhân miễn phí, cài như ứng dụ
 - Dùng **Thêm thư mục** để nhập và nhóm bài hát theo thư mục gốc; có thể mở từng thẻ thư mục trong thư viện.
 - Trên điện thoại, thanh điều hướng cố định phía dưới đưa nhanh tới Trang chủ, Tìm kiếm, Thư viện và Bài hát đã thích.
 - Phát, tìm kiếm, thích/bỏ thích, phát ngẫu nhiên, lặp lại, tua, điều chỉnh âm lượng và xem hàng đợi.
-- Khi phát nhạc, Giai Điệu công bố tên bài hát và điều khiển phát/tạm dừng/bài tiếp cho hệ điều hành qua Media Session API. Trên Android Chrome, trình phát có thể tiếp tục khi khóa màn hình; mức hỗ trợ nền tùy trình duyệt và chế độ tiết kiệm pin của thiết bị.
+- Khi phát nhạc, Pink Tune công bố tên bài hát và điều khiển phát/tạm dừng/bài tiếp cho hệ điều hành qua Media Session API. Trên Android Chrome, trình phát có thể tiếp tục khi khóa màn hình; mức hỗ trợ nền tùy trình duyệt và chế độ tiết kiệm pin của thiết bị.
 - Chất lượng âm thanh giữ nguyên theo tệp gốc và thiết bị phát. Ứng dụng không nâng cấp bitrate hoặc giả lập chất lượng lossless.
 
 ## Giới hạn hiện tại
