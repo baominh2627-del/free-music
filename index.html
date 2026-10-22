@@ -50,7 +50,10 @@
 
       <section class="view" id="view-library">
         <div class="page-heading"><p class="eyebrow">BỘ SƯU TẬP</p><h1>Thư viện nhạc</h1><p class="muted">Quản lý và phát những tệp âm thanh đã thêm.</p></div>
-        <div class="library-toolbar"><div class="toolbar-left"><button class="primary-button" id="library-import">＋ Thêm nhạc</button><button class="play-all-button" id="play-all">▶ Phát tất cả</button></div><span class="muted" id="library-total">0 bài hát</span></div>
+        <div class="library-toolbar"><div class="toolbar-left"><button class="primary-button" id="library-import">＋ Thêm bài hát</button><button class="secondary-button folder-import" id="folder-import">▣ Thêm thư mục</button></div><span class="muted" id="library-total">0 bài hát</span></div>
+        <div class="library-section-heading"><div><p class="eyebrow">SẮP XẾP</p><h2 id="folder-section-title">Thư mục nhạc</h2></div><button class="text-button" id="show-all-folders" hidden>← Tất cả thư mục</button></div>
+        <div class="folder-grid" id="folder-grid"></div>
+        <div class="library-section-heading songs-heading"><div><p class="eyebrow">THƯ VIỆN</p><h2 id="songs-section-title">Tất cả bài hát</h2></div><button class="play-all-button" id="play-all">▶ Phát tất cả</button></div>
         <div class="track-list full-list" id="library-list"></div>
         <div class="empty-state" id="library-empty"><div class="empty-icon">▤</div><h3>Thư viện đang trống</h3><p>Chọn nhạc trong điện thoại. Tệp được lưu trên thiết bị này để nghe ngoại tuyến.</p><button class="secondary-button" id="library-empty-import">＋ Thêm nhạc</button></div>
       </section>
@@ -77,7 +80,15 @@
     <div class="player-extra"><button class="control-button queue-button" id="queue-button" aria-label="Mở hàng đợi">☷</button><span class="volume-icon">◖))</span><input id="volume-bar" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Âm lượng"></div>
   </section>
 
+  <nav class="mobile-nav" aria-label="Điều hướng chính trên điện thoại">
+    <button class="mobile-nav-item active" data-view="home"><span>⌂</span><small>Trang chủ</small></button>
+    <button class="mobile-nav-item" data-view="search"><span>⌕</span><small>Tìm kiếm</small></button>
+    <button class="mobile-nav-item" data-view="library"><span>▤</span><small>Thư viện</small></button>
+    <button class="mobile-nav-item" data-view="liked"><span>♡</span><small>Đã thích</small></button>
+  </nav>
+
   <input id="file-input" type="file" accept="audio/*,.flac,.mp3,.m4a,.aac,.wav,.ogg,.opus" multiple hidden />
+  <input id="folder-input" type="file" accept="audio/*,.flac,.mp3,.m4a,.aac,.wav,.ogg,.opus" webkitdirectory directory multiple hidden />
   <div class="toast" id="toast" role="status"></div>
   <dialog id="queue-dialog" class="queue-dialog"><div class="dialog-heading"><div><p class="eyebrow">ĐANG PHÁT</p><h2>Hàng đợi</h2></div><button class="round-button" id="close-queue" aria-label="Đóng">×</button></div><div id="queue-list" class="track-list"></div><div class="empty-state compact" id="queue-empty"><p>Phát một bài hát để tạo hàng đợi.</p></div></dialog>
   <script src="app.js" defer></script>
