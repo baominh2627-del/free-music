@@ -83,6 +83,25 @@ document.getElementById('admin-button').addEventListener('click',async()=>{openD
 document.getElementById('back-button').addEventListener('click',()=>history.back());document.getElementById('forward-button').addEventListener('click',()=>history.forward());
 if('mediaSession'in navigator){navigator.mediaSession.setActionHandler('play',()=>audio.play());navigator.mediaSession.setActionHandler('pause',()=>audio.pause());navigator.mediaSession.setActionHandler('previoustrack',previousTrack);navigator.mediaSession.setActionHandler('nexttrack',nextTrack);navigator.mediaSession.setActionHandler('seekto',d=>{if(d.seekTime!=null)audio.currentTime=d.seekTime;});}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();state.installPrompt=e;els['install-button'].hidden=false;});els['install-button'].addEventListener('click',async()=>{if(!state.installPrompt){toast('Dùng menu trình duyệt rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.');return;}state.installPrompt.prompt();await state.installPrompt.userChoice;state.installPrompt=null;els['install-button'].hidden=true;});window.addEventListener('appinstalled',()=>{els['install-button'].hidden=true;toast('Đã cài Pink Tune vào điện thoại.');});
-if('serviceWorker'in navigator&&location.protocol!=='file:'){navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!window.__pinkTuneReloading){window.__pinkTuneReloading=true;location.reload();}});navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});}
+const updateDialog=document.getElementById('update-dialog');
+const updateButton=document.getElementById('apply-update');
+const updateStatus=document.getElementById('update-status');
+let appRegistration=null;
+let pendingWorker=null;
+let updateApproved=false;
+function offerAppUpdate(worker){if(!worker)return;pendingWorker=worker;if(!updateDialog.open)updateDialog.showModal();}
+updateButton.addEventListener('click',()=>{pendingWorker=pendingWorker||appRegistration?.waiting;if(!pendingWorker){updateStatus.textContent='Đang kiểm tra bản cập nhật…';appRegistration?.update().catch(()=>{});return;}updateApproved=true;updateButton.disabled=true;updateButton.textContent='Đang cập nhật…';updateStatus.textContent='Đang cài đặt phiên bản mới. App sẽ tự mở lại sau giây lát.';if(navigator.serviceWorker.controller===pendingWorker){window.__pinkTuneReloading=true;location.reload();return;}pendingWorker.postMessage({type:'ACTIVATE_UPDATE'});});
+updateDialog.addEventListener('cancel',event=>event.preventDefault());
+if('serviceWorker'in navigator&&location.protocol!=='file:'){
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(updateApproved&&!window.__pinkTuneReloading){window.__pinkTuneReloading=true;location.reload();}});
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>{
+    appRegistration=registration;
+    const checkInstalledWorker=()=>{const installing=registration.installing;if(!installing)return;const inspect=()=>{if(installing.state==='installed'&&navigator.serviceWorker.controller)offerAppUpdate(registration.waiting||installing);};installing.addEventListener('statechange',inspect);inspect();};
+    if(registration.waiting&&navigator.serviceWorker.controller)offerAppUpdate(registration.waiting);
+    registration.addEventListener('updatefound',checkInstalledWorker);
+    checkInstalledWorker();
+    registration.update().catch(()=>{});
+  }).catch(()=>{});
+}
 openDB().then(async db=>{state.db=db;state.tracks=await getTracks();state.tracks.sort((a,b)=>a.addedAt-b.addedAt);render();}).catch(()=>toast('Không thể mở thư viện lưu trên thiết bị.'));
 initCloud();
