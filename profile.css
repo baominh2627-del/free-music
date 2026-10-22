@@ -1,0 +1,278 @@
+/* Dedicated account page styles. Keep separate so installed PWAs fetch this update cleanly. */
+.profile-view .profile-page-heading {
+  padding: 38px 0 16px;
+}
+
+.profile-view .profile-page-heading h1 {
+  font-size: clamp(25px, 4vw, 34px);
+  line-height: 1.15;
+}
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #f0d5e0;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #fff0f5, #f8d9e5);
+  box-shadow: 0 10px 30px #a85e7b0d;
+}
+
+.profile-avatar-large {
+  display: grid;
+  flex: 0 0 68px;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border: 4px solid #fff8fb;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f1b9d0, #d98dad);
+  color: #fff;
+  font: 800 22px/1 var(--display);
+  white-space: nowrap;
+  box-shadow: 0 6px 18px #b96f8d30;
+}
+
+.profile-identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-role-badge {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: #f4d7e3;
+  color: #a45675;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.profile-identity h2 {
+  margin: 8px 0 4px;
+  font: 750 22px/1.25 var(--display);
+  overflow-wrap: anywhere;
+}
+
+.profile-identity p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.profile-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #f0dce4;
+  border-radius: 12px;
+  background: #fffdfd;
+  box-shadow: 0 8px 24px #a85e7b0a;
+}
+
+.profile-card > .eyebrow,
+.profile-admin-tools .eyebrow {
+  margin: 0 0 7px;
+}
+
+.profile-card h2 {
+  margin: 0;
+  font: 700 18px/1.3 var(--display);
+}
+
+.profile-note {
+  margin: 9px 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.profile-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin: 3px 7px 3px 0;
+  text-decoration: none;
+}
+
+.profile-view [hidden] {
+  display: none !important;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.profile-stat {
+  display: flex;
+  min-width: 0;
+  min-height: 112px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 13px;
+  border: 1px solid #f0dce4;
+  border-radius: 10px;
+  background: #fff2f7;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: transform .15s, background .15s, border-color .15s;
+}
+
+.profile-stat:hover {
+  transform: translateY(-2px);
+  border-color: #e3aec3;
+  background: #fdebf2;
+}
+
+.profile-stat b {
+  font: 800 24px/1 var(--display);
+  color: #bd6d8c;
+}
+
+.profile-stat span {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.profile-stat small {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.profile-admin-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 14px;
+  background: linear-gradient(120deg, #fffdfd, #fff1f6);
+}
+
+.profile-admin-tools .profile-note {
+  margin-bottom: 0;
+}
+
+.profile-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+@media (max-width: 600px) {
+  .profile-view .profile-page-heading {
+    padding: 24px 0 14px;
+  }
+
+  .profile-view .profile-page-heading h1 {
+    font-size: 26px;
+    letter-spacing: -.7px;
+  }
+
+  .profile-view .profile-page-heading .muted {
+    font-size: 12px;
+  }
+
+  .profile-hero {
+    gap: 12px;
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .profile-avatar-large {
+    flex-basis: 56px;
+    width: 56px;
+    height: 56px;
+    font-size: 19px;
+  }
+
+  .profile-role-badge {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .profile-identity h2 {
+    margin-top: 6px;
+    font-size: 17px;
+  }
+
+  .profile-identity p {
+    font-size: 11px;
+  }
+
+  .profile-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .profile-card {
+    padding: 15px;
+    border-radius: 11px;
+  }
+
+  .profile-card h2 {
+    font-size: 16px;
+  }
+
+  .profile-note {
+    font-size: 12px;
+    margin: 8px 0 12px;
+  }
+
+  .profile-action {
+    min-height: 46px;
+  }
+
+  .profile-stats {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .profile-stat {
+    min-height: 102px;
+    padding: 11px;
+  }
+
+  .profile-stat b {
+    font-size: 22px;
+  }
+
+  .profile-stat span {
+    font-size: 10px;
+  }
+
+  .profile-admin-tools {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .profile-admin-actions {
+    justify-content: stretch;
+  }
+
+  .profile-admin-actions .profile-action {
+    flex: 1 1 100%;
+    margin-right: 0;
+  }
+}
