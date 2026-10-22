@@ -49,7 +49,7 @@
         <div class="feature-card"><div class="feature-copy"><span class="feature-tag">NGHE THEO CÁCH CỦA BẠN</span><h2>Thư viện nhạc.<br/>Không giới hạn.</h2><p>Thêm tệp âm thanh của bạn để nghe ngoại tuyến, phát nền và tự do tạo hàng đợi.</p><button class="feature-button" id="feature-import">Chọn nhạc <span>→</span></button></div><div class="feature-art" aria-hidden="true"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-disc"><div class="disc-label">♪</div></div><div class="art-spark spark-one">✳</div><div class="art-spark spark-two">✦</div></div></div>
         <div class="section-heading community-heading" id="community-home-heading" hidden><div><h2>Nhạc cộng đồng</h2><p class="muted">Bài hát được chia sẻ trên Pink Tune</p></div><button class="text-button" data-view="library">Xem thư viện →</button></div>
         <div class="track-list community-list" id="community-home-list" hidden></div>
-        <div class="section-heading"><div><h2>Nghe gần đây</h2><p class="muted">Những bài hát trong thư viện của bạn</p></div><button class="text-button" data-view="library">Xem thư viện →</button></div>
+        <div class="section-heading recent-section-heading"><div><h2>Nghe gần đây</h2><p class="muted">Những bài bạn vừa phát</p></div><button class="text-button" data-view="recent">Xem tất cả →</button></div>
         <div class="empty-state" id="home-empty"><div class="empty-icon">♫</div><h3>Bắt đầu với nhạc của bạn</h3><p>Chọn tệp MP3, M4A, AAC, WAV, OGG hoặc FLAC từ điện thoại.</p><button class="secondary-button" id="empty-import">Chọn tệp nhạc</button></div>
         <div class="track-list" id="recent-list"></div>
         <div class="section-heading liked-heading"><div><h2>Đã thích</h2><p class="muted">Lưu những bài hát bạn muốn nghe lại</p></div><button class="text-button" data-view="liked">Xem tất cả →</button></div>
@@ -93,6 +93,23 @@
       <section class="view" id="view-search">
         <div class="page-heading"><p class="eyebrow">TÌM KIẾM</p><h1>Thư viện của bạn</h1><p class="muted">Tìm theo tên bài hát hoặc nghệ sĩ.</p></div>
         <div class="search-results" id="search-results"><div class="empty-state compact"><div class="empty-icon">⌕</div><h3>Tìm bài hát</h3><p>Kết quả sẽ xuất hiện khi bạn nhập từ khóa.</p></div></div>
+      </section>
+
+      <section class="view recent-view" id="view-recent">
+        <div class="page-heading"><p class="eyebrow">LỊCH SỬ NGHE</p><h1>Nghe gần đây</h1><p class="muted">Các bài hát bạn đã phát trên thiết bị này.</p></div>
+        <div class="track-list full-list" id="recent-history-list"></div>
+        <div class="empty-state" id="recent-history-empty"><div class="empty-icon">◷</div><h3>Chưa có lịch sử nghe</h3><p>Bài hát bạn phát sẽ xuất hiện tại đây.</p><button class="secondary-button" type="button" data-view="library">Mở thư viện nhạc</button></div>
+      </section>
+
+      <section class="view artist-view" id="view-artist">
+        <button class="text-button artist-back" id="artist-back" type="button">← Quay lại</button>
+        <div class="artist-hero">
+          <div class="artist-page-art" id="artist-page-art" aria-hidden="true">♫</div>
+          <div class="artist-page-copy"><p class="eyebrow">NGHỆ SĨ</p><h1 id="artist-page-title">Nghệ sĩ</h1><p class="muted" id="artist-page-count">0 bài hát</p><button class="primary-button" id="artist-page-play" type="button">▶ Phát nhạc</button></div>
+        </div>
+        <div class="section-heading"><div><h2>Nhạc của nghệ sĩ</h2><p class="muted">Các bài hát khớp với tên nghệ sĩ đã nhập khi đăng.</p></div></div>
+        <div class="track-list full-list" id="artist-track-list"></div>
+        <div class="empty-state" id="artist-track-empty"><h3>Chưa có bài hát khác</h3><p>Các bài hát cùng tên nghệ sĩ sẽ xuất hiện tại đây.</p></div>
       </section>
 
       <section class="view profile-view" id="view-profile">

@@ -402,3 +402,47 @@
   .track-owner img { display: block; width: 16px; height: 16px; flex: 0 0 16px; border-radius: 50%; object-fit: cover; }
   .track-owner > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+/* Recent listening history and artist pages. Mobile sizing is the default. */
+.track-title .artist-link {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 24px;
+  overflow: hidden;
+  padding: 1px 0;
+  background: transparent;
+  color: #927b87;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.track-title .artist-link:hover { color: #b66083; text-decoration: underline; }
+#recent-list .track-title .artist-link,
+#liked-preview .track-title .artist-link { font-size: 8px; }
+.community-list .track-title .artist-link { min-height: 20px; font-size: 8px; }
+.artist-back { min-height: 42px; margin: 8px 0 4px; padding: 9px 0; font-size: 13px; }
+.artist-hero { display: flex; align-items: flex-end; gap: 14px; min-width: 0; padding: 8px 0 22px; }
+.artist-page-art { display: grid; flex: 0 0 clamp(88px, 27vw, 128px); width: clamp(88px, 27vw, 128px); aspect-ratio: 1; place-items: center; overflow: hidden; border-radius: 14px; background: linear-gradient(145deg, #edc6d6, #c5799a); color: #fff8fb; font-size: 42px; box-shadow: 0 10px 28px #8b4b6726; }
+.artist-page-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.artist-page-copy { min-width: 0; }
+.artist-page-copy .eyebrow { margin-bottom: 5px; }
+.artist-page-copy h1 { margin: 0; overflow-wrap: anywhere; font: 800 clamp(22px, 6vw, 32px)/1.12 var(--display); letter-spacing: -.8px; }
+.artist-page-copy .muted { margin: 6px 0 10px; font-size: 12px; }
+.artist-page-copy .primary-button { min-height: 42px; padding-inline: 15px; }
+.artist-page-play:disabled { opacity: .5; }
+.artist-view .section-heading { margin-top: 12px; }
+.artist-view .section-heading p { display: block; }
+.recent-view .page-heading { padding-bottom: 18px; }
+#recent-history-list[hidden], #artist-track-list[hidden] { display: none !important; }
+@media (min-width: 700px) {
+  .track-title .artist-link { font-size: 10px; }
+  #recent-list .track-title .artist-link, #liked-preview .track-title .artist-link { font-size: 10px; }
+  .community-list .track-title .artist-link { font-size: 10px; }
+  .artist-hero { gap: 24px; padding-block: 14px 28px; }
+  .artist-view .section-heading { margin-top: 18px; }
+}
