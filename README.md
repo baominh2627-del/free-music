@@ -2,6 +2,8 @@
 
 Pink Tune là trình phát nhạc cá nhân miễn phí với giao diện hồng pastel, cài như ứng dụng trên Android và hỗ trợ phát nền qua trình duyệt. Ứng dụng phát tệp âm thanh do người dùng thêm vào; dự án không bao gồm nhạc thương mại, tài khoản Spotify, hoặc nguồn stream không có giấy phép.
 
+Muốn bật tải nhạc lên thư viện chung để mọi người cùng nghe, cấu hình Supabase theo [SUPABASE_SETUP.md](SUPABASE_SETUP.md).
+
 ## Cài trên điện thoại Android
 
 Ứng dụng web cần được mở từ địa chỉ HTTPS để trình duyệt cho phép cài đặt và lưu ứng dụng ngoại tuyến. Đưa thư mục này lên một máy chủ web HTTPS (ví dụ GitHub Pages), mở đường dẫn trên Chrome Android, rồi chọn **Cài ứng dụng** hoặc **Thêm vào màn hình chính** trong menu trình duyệt. Không cần Play Store.
