@@ -6,6 +6,16 @@
   --motion-ease: cubic-bezier(.2, .75, .25, 1);
 }
 
+/* Disable Android Chrome/WebView's default colored flash on touch. */
+:where(a, button, [role="button"], input, select, textarea, label, summary) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Keep keyboard navigation visible, using Pink Tune's pink instead of lime. */
+:where(button, input, select, textarea, a, [role="button"]):focus-visible {
+  outline-color: #d58cab;
+}
+
 button,
 .track-row,
 .folder-card,
