@@ -9,7 +9,7 @@ Pink Tune đang chạy trên GitHub Pages nên không thể tự nhận tệp t�
 3. Trong **SQL Editor**, chạy toàn bộ nội dung `supabase/schema.sql`.
 4. Trong phần **API Settings**, giữ schema `public` trong danh sách exposed schemas để app đọc catalog qua Data API.
 
-Bucket public cho phép mọi người nghe tệp qua URL; chỉ tài khoản được thêm vào bảng quản trị mới có policy tải tệp lên. Không tải nhạc mà bạn không có quyền chia sẻ công khai.
+Bucket public cho phép mọi người nghe tệp qua URL. Tài khoản quản trị và tài khoản đăng nhạc được cấp quyền riêng mới có thể tải tệp lên. Không tải nhạc mà bạn không có quyền chia sẻ công khai.
 
 ## 2. Tạo tài khoản quản trị
 
@@ -23,7 +23,24 @@ values ('00000000-0000-0000-0000-000000000000')
 on conflict (user_id) do nothing;
 ```
 
-## 3. Kết nối app với project
+## 3. Tạo tài khoản đăng nhạc thường
+
+Tài khoản này có thể đăng bài hát nhưng không thấy đường dẫn Table Editor trong app và không có quyền sửa/xóa bài hát.
+
+1. Với dự án đã chạy schema trước đây, trước tiên chạy nội dung `supabase/uploader-roles-migration.sql` trong SQL Editor để bật vai trò uploader.
+2. Trong **Authentication → Users**, chọn **Add user → Create new user**, nhập email và mật khẩu, rồi tạo tài khoản.
+3. Sao chép UID của tài khoản đó.
+4. Mở **SQL Editor** và chạy lệnh dưới đây sau khi thay UID:
+
+```sql
+insert into public.pink_tune_uploaders (user_id)
+values ('00000000-0000-0000-0000-000000000000')
+on conflict (user_id) do nothing;
+```
+
+5. Tài khoản đó đăng nhập trong Pink Tune qua **↑ Đăng nhạc**. Chỉ quản trị viên trong `pink_tune_admins` mới thấy liên kết Table Editor.
+
+## 4. Kết nối app với project
 
 Trong **Project Settings → API Keys**, lấy Project URL và **publishable key**. Điền vào `supabase-config.js`:
 
