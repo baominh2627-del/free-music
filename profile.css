@@ -390,8 +390,56 @@
 }
 
 .profile-button img[hidden], .profile-avatar-large img[hidden], .cover-art img[hidden], .album-art-large img[hidden], .track-cover img[hidden], .playlist-pick-cover img[hidden] { display: none !important; }
+.profile-button img:not([hidden]) + span,
+.profile-avatar-large img:not([hidden]) + span { display: none !important; }
 @media (max-width: 600px) {
-  .community-list .track-row { min-height: 78px; height: auto; }
+  /* Community tracks need a full-width row on phones so artwork and copy
+     never compete for the narrow two-column card width. */
+  .community-list { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .community-list .track-row {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-areas: "cover copy";
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    min-height: 78px;
+    height: auto;
+    padding: 8px;
+  }
+  .community-list .track-number,
+  .community-list .track-album,
+  .community-list .track-duration,
+  .community-list .row-actions { display: none !important; }
+  .community-list .track-cover {
+    grid-area: cover;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    margin: 0;
+  }
+  .community-list .track-title {
+    grid-area: copy;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    text-align: left;
+  }
+  .community-list .track-title b {
+    display: block;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .community-list .track-title .artist-link {
+    width: 100%;
+    min-height: 24px;
+    margin-top: 3px;
+    font-size: 12px;
+  }
   .community-list .track-owner { display: flex !important; align-items: center; gap: 4px; margin-top: 3px; color: #9a7b89; font-size: 8px; }
   .community-list .track-owner img { display: block; width: 14px; height: 14px; flex: 0 0 14px; border-radius: 50%; object-fit: cover; }
   .community-list .track-owner > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
