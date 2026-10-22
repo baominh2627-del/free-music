@@ -167,8 +167,9 @@
   <dialog id="admin-dialog" class="admin-dialog">
     <div class="dialog-heading"><div><p class="eyebrow">PINK TUNE STUDIO</p><h2>Đăng nhạc cho mọi người</h2></div><button class="round-button" id="close-admin" aria-label="Đóng">×</button></div>
     <p class="admin-description">Tệp tải lên sẽ được lưu trực tuyến để mọi người mở Pink Tune và nghe.</p>
-    <p class="cloud-status" id="cloud-status" role="status"></p>
-    <form class="admin-form" id="admin-login-form" hidden>
+    <p class="cloud-status" id="cloud-status" role="status" aria-live="polite">Đang kết nối dịch vụ tài khoản…</p>
+    <button class="text-button cloud-retry" id="cloud-retry" type="button" hidden>Thử kết nối lại</button>
+    <form class="admin-form" id="admin-login-form">
       <label>Email tài khoản<input id="admin-email" type="email" autocomplete="username" required /></label>
       <label>Mật khẩu<input id="admin-password" type="password" autocomplete="current-password" required /></label>
       <button class="primary-button" type="submit">Đăng nhập</button>
