@@ -27,18 +27,11 @@ on conflict (user_id) do nothing;
 
 Tài khoản này có thể đăng bài hát nhưng không thấy đường dẫn Table Editor trong app và không có quyền sửa/xóa bài hát.
 
-1. Với dự án đã chạy schema trước đây, trước tiên chạy nội dung `supabase/uploader-roles-migration.sql` trong SQL Editor để bật vai trò uploader.
-2. Trong **Authentication → Users**, chọn **Add user → Create new user**, nhập email và mật khẩu, rồi tạo tài khoản.
-3. Sao chép UID của tài khoản đó.
-4. Mở **SQL Editor** và chạy lệnh dưới đây sau khi thay UID:
+1. Với dự án đã chạy schema trước đây, chạy nội dung `supabase/uploader-roles-migration.sql` trong SQL Editor để bật vai trò uploader.
+2. Triển khai Edge Function `admin-create-uploader`: vào **Edge Functions → Deploy a new function → Via Editor**, đặt tên `admin-create-uploader`, thay mã mẫu bằng nội dung `supabase/functions/admin-create-uploader/index.ts`, rồi bấm **Deploy**. Function dùng secret key được Supabase cấp trong môi trường server; không đưa secret key vào app hoặc GitHub.
+3. Tài khoản admin mở Pink Tune → **↑ Đăng nhạc** → điền email và mật khẩu tạm ở mục **Tạo tài khoản đăng nhạc** → bấm **Tạo tài khoản thường**. Hãy gửi mật khẩu cho người dùng qua kênh riêng.
 
-```sql
-insert into public.pink_tune_uploaders (user_id)
-values ('00000000-0000-0000-0000-000000000000')
-on conflict (user_id) do nothing;
-```
-
-5. Tài khoản đó đăng nhập trong Pink Tune qua **↑ Đăng nhạc**. Chỉ quản trị viên trong `pink_tune_admins` mới thấy liên kết Table Editor.
+Tài khoản đó đăng nhập trong Pink Tune qua **↑ Đăng nhạc**. Chỉ quản trị viên trong `pink_tune_admins` mới thấy liên kết Table Editor. Nếu không muốn dùng giao diện tạo tài khoản, có thể tạo user trong **Authentication → Users** rồi thêm UID vào `public.pink_tune_uploaders` bằng SQL.
 
 ## 4. Kết nối app với project
 

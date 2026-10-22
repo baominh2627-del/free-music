@@ -122,6 +122,14 @@
         <span><b>Thư mục quản lý nhạc</b><small>Mở Table Editor của Supabase</small></span>
         <span class="admin-folder-arrow" aria-hidden="true">↗</span>
       </a>
+      <section class="admin-account-create" id="admin-account-create" hidden aria-labelledby="create-uploader-title">
+        <h3 id="create-uploader-title">Tạo tài khoản đăng nhạc</h3>
+        <label>Email tài khoản mới<input id="new-uploader-email" type="text" inputmode="email" autocapitalize="off" autocomplete="off" placeholder="ten@email.com" /></label>
+        <label>Mật khẩu tạm<input id="new-uploader-password" type="password" autocomplete="new-password" placeholder="Ít nhất 8 ký tự" /></label>
+        <label>Nhập lại mật khẩu<input id="new-uploader-password-confirm" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" /></label>
+        <button class="secondary-button" id="create-uploader-button" type="button">＋ Tạo tài khoản thường</button>
+        <p class="admin-note">Tài khoản mới được đăng nhạc; không có quyền mở Table Editor hoặc xóa bài.</p>
+      </section>
       <label>Tên bài hát<input id="upload-title" type="text" maxlength="160" required placeholder="Ví dụ: Bản nhạc mùa hè" /></label>
       <label>Nghệ sĩ<input id="upload-artist" type="text" maxlength="120" required placeholder="Tên nghệ sĩ" /></label>
       <label>Tệp âm thanh<input id="shared-audio-file" type="file" accept="audio/*,.flac,.mp3,.m4a,.aac,.wav,.ogg,.opus" required /></label>
