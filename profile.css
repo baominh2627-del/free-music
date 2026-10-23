@@ -177,6 +177,35 @@
   gap: 6px;
 }
 
+.profile-settings-shortcut {
+  min-height: 42px;
+  margin-top: 14px;
+  border: 1px solid #efd8e2;
+  background: #fffafd;
+  color: #704f5d;
+}
+
+.profile-settings-shortcut span {
+  margin-right: 5px;
+}
+
+.settings-page-heading {
+  padding-top: 38px;
+}
+
+.settings-login-note {
+  max-width: 720px;
+}
+
+.settings-login-note .profile-action {
+  margin-top: 2px;
+}
+
+.settings-view [hidden],
+.profile-edit-form[hidden] {
+  display: none !important;
+}
+
 @media (max-width: 600px) {
   .profile-view .profile-page-heading {
     padding: 24px 0 14px;
@@ -275,6 +304,24 @@
     flex: 1 1 100%;
     margin-right: 0;
   }
+
+  .profile-settings-shortcut {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .settings-page-heading {
+    padding: 24px 0 14px;
+  }
+
+  .settings-page-heading h1 {
+    font-size: 26px;
+    letter-spacing: -.7px;
+  }
+
+  .settings-page-heading .muted {
+    font-size: 12px;
+  }
 }
 
 
@@ -330,6 +377,16 @@
 .playlist-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
 .playlist-card { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 10px; border: 1px solid #f0dce4; border-radius: 11px; background: #fffafd; color: var(--text); text-align: left; cursor: pointer; }
 .playlist-card.selected { border-color: #d795af; background: #fbeaf1; }
+.playlist-card-wrap { position: relative; padding: 0; cursor: default; }
+.playlist-card-wrap:has(.playlist-card-menu[open]) { z-index: 9; }
+.playlist-card-open { display: flex; flex: 1; align-items: center; gap: 12px; min-width: 0; padding: 10px; border-radius: inherit; background: transparent; color: inherit; text-align: left; }
+.playlist-card-menu { position: relative; flex: 0 0 42px; align-self: stretch; display: grid; place-items: center; }
+.playlist-card-menu summary { display: grid; place-items: center; width: 40px; height: 44px; border-radius: 9px; color: #8f6477; font-size: 24px; line-height: 1; cursor: pointer; list-style: none; }
+.playlist-card-menu summary::-webkit-details-marker { display: none; }
+.playlist-card-menu summary:hover, .playlist-card-menu[open] summary { background: #f8e5ed; }
+.playlist-card-menu-popover { position: absolute; z-index: 8; top: calc(100% - 3px); right: 4px; display: grid; min-width: 205px; gap: 3px; padding: 6px; border: 1px solid #eed6e1; border-radius: 10px; background: #fffafd; box-shadow: 0 10px 28px #67435722; }
+.playlist-card-menu-popover button { min-height: 40px; padding: 8px 10px; border-radius: 7px; background: transparent; color: #654958; text-align: left; font-size: 12px; }
+.playlist-card-menu-popover button:hover { background: #f9e7ee; }
 .playlist-card-art { display: grid; flex: 0 0 48px; width: 48px; height: 48px; place-items: center; border-radius: 8px; background: linear-gradient(145deg, #f2d2df, #f9e8ef); color: #b76d8d; font-size: 22px; }
 .playlist-card-art.smart-art { background: linear-gradient(145deg, #dfc6ee, #efaec9 55%, #f8d5df); color: #fff; font-size: 25px; }
 .playlist-card-copy { flex: 1; min-width: 0; }
@@ -393,13 +450,19 @@
 .profile-button img:not([hidden]) + span,
 .profile-avatar-large img:not([hidden]) + span { display: none !important; }
 @media (max-width: 600px) {
+  #library-list .track-row { grid-template-columns: 44px minmax(0, 1fr) 76px; gap: 8px; min-height: 68px; height: auto; padding: 8px; }
+  #library-list .track-number { display: none; }
+  #library-list .track-cover { grid-column: 1; grid-row: 1; }
+  #library-list .track-title { grid-column: 2; grid-row: 1; }
+  #library-list .row-actions { grid-column: 3; grid-row: 1; display: flex; gap: 0; justify-content: flex-end; }
+  #library-list .row-actions .icon-action { width: 36px; min-width: 36px; height: 42px; padding: 0; font-size: 18px; }
   /* Community tracks need a full-width row on phones so artwork and copy
      never compete for the narrow two-column card width. */
   .community-list { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .community-list .track-row {
     display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
-    grid-template-areas: "cover copy";
+    grid-template-columns: 56px minmax(0, 1fr) 40px;
+    grid-template-areas: "cover copy actions";
     align-items: center;
     gap: 10px;
     width: 100%;
@@ -410,8 +473,7 @@
   }
   .community-list .track-number,
   .community-list .track-album,
-  .community-list .track-duration,
-  .community-list .row-actions { display: none !important; }
+  .community-list .track-duration { display: none !important; }
   .community-list .track-cover {
     grid-area: cover;
     width: 56px;
@@ -426,6 +488,14 @@
     overflow: hidden;
     text-align: left;
   }
+  .community-list .row-actions { grid-area: actions; display: flex !important; flex-direction: column; gap: 2px; justify-content: center; }
+  .community-list .row-actions .icon-action { display: grid; place-items: center; width: 40px; height: 38px; padding: 0; font-size: 20px; }
+  #playlist-detail-list .track-row { grid-template-columns: 44px minmax(0, 1fr) 96px; gap: 8px; padding: 8px; }
+  #playlist-detail-list .track-number { display: none; }
+  #playlist-detail-list .track-cover { grid-column: 1; grid-row: 1; }
+  #playlist-detail-list .track-title { grid-column: 2; grid-row: 1; }
+  #playlist-detail-list .row-actions { grid-column: 3; grid-row: 1; display: flex; gap: 0; }
+  #playlist-detail-list .row-actions .icon-action { width: 32px; min-width: 32px; height: 42px; padding: 0; font-size: 17px; }
   .community-list .track-title b {
     display: block;
     overflow: hidden;
@@ -444,6 +514,7 @@
   .community-list .track-owner img { display: block; width: 14px; height: 14px; flex: 0 0 14px; border-radius: 50%; object-fit: cover; }
   .community-list .track-owner > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .community-list .track-title > span:not(.track-owner) { font-size: 8px; margin-top: 2px; }
+  .downloaded-action { color: #6e9b6b !important; }
 }
 @media (min-width: 601px) {
   .track-owner { display: flex !important; align-items: center; gap: 5px; margin-top: 3px; color: #9a7b89; font-size: 9px; }
