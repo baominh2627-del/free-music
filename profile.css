@@ -206,6 +206,109 @@
   display: none !important;
 }
 
+/* Keep notifications readable and visible above the page on every screen. */
+.toast {
+  z-index: 20;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  transform: translate(-50%, -10px);
+}
+
+.toast.show {
+  transform: translate(-50%, 0);
+}
+
+.cloud-status {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.upload-help-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 12px 0 16px;
+  padding: 15px;
+  border: 1px solid #e7b0c6;
+  border-radius: 13px;
+  background: linear-gradient(125deg, #fff0f5, #f9e1eb);
+  color: inherit;
+  box-shadow: 0 8px 22px #a85e7b12;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+
+.upload-help-card:hover,
+.upload-help-card:focus-visible {
+  border-color: #d98eaa;
+  box-shadow: 0 10px 26px #a85e7b20;
+}
+
+.upload-help-card[hidden] {
+  display: none !important;
+}
+
+.upload-help-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 11px;
+  background: #f1d0de;
+  color: #a85679;
+  font-size: 23px;
+}
+
+.upload-help-copy {
+  min-width: 0;
+}
+
+.upload-help-copy .eyebrow {
+  margin: 1px 0 5px;
+  color: #ae6482;
+}
+
+.upload-help-copy h3 {
+  margin: 0;
+  color: #563d49;
+  font: 750 15px/1.35 var(--display);
+}
+
+.upload-help-copy p:not(.eyebrow) {
+  margin: 6px 0 0;
+  color: #806b76;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.upload-help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 42px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 22px;
+  background: #e8a6bf;
+  color: #543947;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.upload-help-card:hover .upload-help-link {
+  background: #df91b0;
+}
+
 @media (max-width: 600px) {
   .profile-view .profile-page-heading {
     padding: 24px 0 14px;
@@ -321,6 +424,41 @@
 
   .settings-page-heading .muted {
     font-size: 12px;
+  }
+
+  .toast {
+    right: max(12px, env(safe-area-inset-right, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px));
+    width: auto;
+    max-width: none;
+    transform: translateY(-10px);
+  }
+
+  .toast.show {
+    transform: translateY(0);
+  }
+
+  .upload-help-card {
+    gap: 9px;
+    padding: 12px;
+  }
+
+  .upload-help-icon {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .upload-help-copy h3 {
+    font-size: 14px;
+  }
+
+  .upload-help-copy p:not(.eyebrow) {
+    font-size: 12px;
+  }
+
+  .upload-help-link {
+    min-height: 44px;
   }
 }
 
