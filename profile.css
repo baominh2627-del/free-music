@@ -726,10 +726,22 @@
 .track-action-create-form label { color: var(--muted); font-size: 12px; font-weight: 600; }
 .track-action-create-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #e9cbd8; border-radius: 9px; background: #fffafd; color: var(--text); }
 .track-action-create-form .primary-button { min-height: 46px; }
+#liked-list .track-row[data-long-press-actions], #playlist-detail-list .track-row[data-long-press-actions] { grid-template-columns: 32px 44px minmax(120px, 1fr) minmax(80px, .7fr) 42px 112px; gap: 9px; }
+#liked-list .track-row[data-long-press-actions] .row-actions, #playlist-detail-list .track-row[data-long-press-actions] .row-actions { gap: 0; min-width: 0; }
+.track-more-action { display: grid; flex: 0 0 36px; place-items: center; width: 36px; min-width: 36px; height: 42px; padding: 0; color: #a45675; font-size: 24px; line-height: 1; }
+.track-more-action:hover, .track-more-action:focus-visible { background: #f8e5ed; color: #843c5c; border-radius: 8px; }
 @media (max-width: 600px) {
   .liked-toolbar { flex-wrap: wrap; }
   .liked-toolbar .large-play { flex: 0 0 42px; width: 42px; height: 42px; padding: 0; }
   .liked-toolbar > .muted { flex: 1 1 calc(100% - 155px); }
   .liked-add-toggle { min-height: 42px; padding: 9px 11px; font-size: 11px; }
   .track-actions-dialog { padding: 18px 16px; }
+  #liked-list .track-row[data-long-press-actions], #playlist-detail-list .track-row[data-long-press-actions] { grid-template-columns: 44px minmax(0, 1fr) 104px; gap: 7px; min-height: 68px; height: auto; padding: 8px; }
+  #liked-list .track-row[data-long-press-actions] .track-number, #playlist-detail-list .track-row[data-long-press-actions] .track-number { display: none; }
+  #liked-list .track-row[data-long-press-actions] .track-cover, #playlist-detail-list .track-row[data-long-press-actions] .track-cover { grid-column: 1; grid-row: 1; width: 44px; height: 44px; }
+  #liked-list .track-row[data-long-press-actions] .track-title, #playlist-detail-list .track-row[data-long-press-actions] .track-title { grid-column: 2; grid-row: 1; }
+  #liked-list .track-row[data-long-press-actions] .track-album, #liked-list .track-row[data-long-press-actions] .track-duration, #playlist-detail-list .track-row[data-long-press-actions] .track-album, #playlist-detail-list .track-row[data-long-press-actions] .track-duration { display: none; }
+  #liked-list .track-row[data-long-press-actions] .row-actions, #playlist-detail-list .track-row[data-long-press-actions] .row-actions { grid-column: 3; grid-row: 1; display: flex; justify-content: flex-end; gap: 0; }
+  #liked-list .track-row[data-long-press-actions] .row-actions .icon-action, #playlist-detail-list .track-row[data-long-press-actions] .row-actions .icon-action { flex: 0 0 34px; width: 34px; min-width: 34px; height: 42px; padding: 0; font-size: 18px; }
+  #liked-list .track-row[data-long-press-actions] .row-actions .track-more-action, #playlist-detail-list .track-row[data-long-press-actions] .row-actions .track-more-action { font-size: 24px; }
 }
