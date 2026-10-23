@@ -238,3 +238,13 @@ body{background:var(--bg);color:var(--text)}
   .full-player-footer{font-size:16px}
   .full-player-footer button{min-width:52px;min-height:52px;font-size:27px}
 }
+
+
+/* Shared track rows include title, artist, and uploader details on desktop. */
+@media (min-width: 601px) {
+  .community-list .track-row {
+    height: auto;
+    min-height: 76px;
+    padding-block: 8px;
+  }
+}
