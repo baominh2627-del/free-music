@@ -703,3 +703,33 @@
   .artist-hero { gap: 24px; padding-block: 14px 28px; }
   .artist-view .section-heading { margin-top: 18px; }
 }
+
+.liked-toolbar { gap: 10px; }
+.liked-toolbar > .muted { flex: 1; min-width: 0; }
+.liked-add-toggle { flex: 0 0 auto; min-height: 40px; white-space: nowrap; }
+.track-row[data-long-press-actions] { touch-action: pan-y; -webkit-touch-callout: none; user-select: none; }
+.track-actions-dialog { width: min(420px, calc(100vw - 28px)); max-height: min(82dvh, 620px); overflow: auto; }
+.track-actions-dialog [hidden] { display: none !important; }
+.track-actions-subtitle { margin: -7px 0 15px; font-size: 12px; overflow-wrap: anywhere; }
+.track-actions-options, .track-playlist-options { display: grid; gap: 8px; }
+.track-action-choice, .track-playlist-option { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid #efd9e3; border-radius: 9px; background: #fffafd; color: #654958; text-align: left; font-size: 13px; }
+.track-action-choice:hover, .track-playlist-option:hover { background: #f9e7ee; }
+.track-playlist-option > span:nth-child(2) { flex: 1; min-width: 0; }
+.track-playlist-option b, .track-playlist-option small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track-playlist-option b { font-size: 12px; }
+.track-playlist-option small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+.track-playlist-option strong { color: #b76d8d; font-size: 19px; }
+.track-playlist-option.create-track-playlist-option { justify-content: center; color: #a45675; font-weight: 700; }
+.track-playlist-empty { margin: 2px 0 5px; font-size: 12px; line-height: 1.5; }
+.track-action-back { margin-top: 9px; padding: 8px 0; }
+.track-action-create-form { display: grid; gap: 10px; }
+.track-action-create-form label { color: var(--muted); font-size: 12px; font-weight: 600; }
+.track-action-create-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #e9cbd8; border-radius: 9px; background: #fffafd; color: var(--text); }
+.track-action-create-form .primary-button { min-height: 46px; }
+@media (max-width: 600px) {
+  .liked-toolbar { flex-wrap: wrap; }
+  .liked-toolbar .large-play { flex: 0 0 42px; width: 42px; height: 42px; padding: 0; }
+  .liked-toolbar > .muted { flex: 1 1 calc(100% - 155px); }
+  .liked-add-toggle { min-height: 42px; padding: 9px 11px; font-size: 11px; }
+  .track-actions-dialog { padding: 18px 16px; }
+}
