@@ -240,11 +240,13 @@ body{background:var(--bg);color:var(--text)}
 }
 
 
-/* Shared track rows include title, artist, and uploader details on desktop. */
+/* Give desktop rows with longer metadata enough vertical room. */
 @media (min-width: 601px) {
-  .community-list .track-row {
+  .community-list .track-row,
+  #recent-list .track-row,
+  #recommendation-list .track-row {
     height: auto;
-    min-height: 76px;
+    min-height: 96px;
     padding-block: 8px;
   }
 }
