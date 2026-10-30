@@ -223,13 +223,13 @@
             </div>
             <div class="jam-control-group jam-slash-group">
               <label class="jam-field" for="jam-slash-bass"><span>Nốt bass riêng (slash chord)</span><select id="jam-slash-bass"><option value="">Không dùng</option><option value="0">C</option><option value="1">C♯</option><option value="2">D</option><option value="3">D♯</option><option value="4">E</option><option value="5">F</option><option value="6">F♯</option><option value="7">G</option><option value="8">G♯</option><option value="9">A</option><option value="10">A♯</option><option value="11">B</option></select></label>
-              <p class="jam-help jam-slash-help">Bàn phím: giữ nốt gốc trước, thêm nốt bass sau. Ví dụ giữ G rồi nhấn B để chơi G/B.</p>
+              <p class="jam-help jam-slash-help">Bàn phím: giữ nốt gốc, thêm M/7 nếu cần, rồi nhấn nốt bass. G + B → G/B; E + 7 + B → E7/B.</p>
             </div>
             <div class="jam-control-group jam-transpose-group" aria-label="Điều chỉnh tone và capo">
               <div class="jam-shift-control"><span>Dịch tông</span><div><button type="button" id="jam-tone-down" aria-label="Hạ tông một bán cung">−</button><output id="jam-tone-value">0 bán cung</output><button type="button" id="jam-tone-up" aria-label="Tăng tông một bán cung">＋</button></div></div>
               <div class="jam-shift-control"><span>Capo</span><div><button type="button" id="jam-capo-down" aria-label="Giảm capo một ngăn">−</button><output id="jam-capo-value">0 ngăn</output><button type="button" id="jam-capo-up" aria-label="Tăng capo một ngăn">＋</button></div></div>
             </div>
-            <p class="jam-keyboard-feedback" id="jam-keyboard-feedback" aria-live="polite">Máy tính: giữ C + M + 7 để phát Cm7, hoặc giữ G rồi nhấn B để tạo G/B; thả phím để ngắt.</p>
+            <p class="jam-keyboard-feedback" id="jam-keyboard-feedback" aria-live="polite">Máy tính: C + M + 7 tạo Cm7; giữ G rồi nhấn B tạo G/B; giữ E rồi nhấn 7 và B tạo E7/B.</p>
           </section>
 
           <section class="jam-card jam-settings-card" aria-labelledby="jam-settings-heading">

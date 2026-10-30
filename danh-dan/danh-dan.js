@@ -471,8 +471,8 @@
       const offsets = [0, 7, 12, 12 + third, seventh ? 22 : 19, 24];
       const notes = offsets.map(offset => rootMidi + offset);
       if (chord.bassPitchClass !== null) {
-        notes.shift();
-        notes.unshift(36 + chord.bassPitchClass);
+        const bassMidi = 36 + chord.bassPitchClass;
+        return [bassMidi, ...notes.filter((note, index) => index > 0 && note !== bassMidi)];
       }
       return notes;
     }
@@ -889,7 +889,7 @@
     state.gestureHadChord = false;
     state.keyboardBassPitchClass = null;
     releaseHeldChord('keyboard');
-    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C + M + 7 để phát Cm7, hoặc giữ G rồi nhấn B để tạo G/B; thả phím để ngắt.';
+    el('jam-keyboard-feedback').textContent = 'Máy tính: C + M + 7 tạo Cm7; giữ G rồi nhấn B tạo G/B; giữ E rồi nhấn 7 và B tạo E7/B.';
   }
 
   view.querySelectorAll('[data-root]').forEach(button => {
