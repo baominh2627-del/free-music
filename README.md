@@ -16,7 +16,8 @@ Muốn cài bằng file APK, tải [Pink Tune APK mới nhất](https://github.c
 
 - Chọn **Thêm nhạc** để chép các tệp âm thanh vào thư viện ngoại tuyến của trình duyệt trên thiết bị.
 - Dùng **Thêm thư mục** để nhập và nhóm bài hát theo thư mục gốc; có thể mở từng thẻ thư mục trong thư viện.
-- Trên điện thoại, thanh điều hướng cố định phía dưới đưa nhanh tới Trang chủ, Tìm kiếm, Thư viện và Bài hát đã thích.
+- Trên điện thoại, thanh điều hướng cố định phía dưới đưa nhanh tới Trang chủ, Tìm kiếm, Đánh Đàn, Thư viện và Bài hát đã thích.
+- Mở **Đánh Đàn** để chọn hợp âm, điệu đệm, BPM và âm sắc. Trên máy tính, giữ phím nốt cùng `M` và/hoặc `7` rồi thả để chơi (ví dụ `C + M + 7` tạo Cm7); chạm trực tiếp các nút cũng được. Nhấn `Space` để chạy/tạm dừng điệu và `Esc` để dừng.
 - Phát, tìm kiếm, thích/bỏ thích, phát ngẫu nhiên, lặp lại, tua, điều chỉnh âm lượng và xem hàng đợi.
 - Khi phát nhạc, Pink Tune công bố tên bài hát và điều khiển phát/tạm dừng/bài tiếp cho hệ điều hành qua Media Session API. Trên Android Chrome, trình phát có thể tiếp tục khi khóa màn hình; mức hỗ trợ nền tùy trình duyệt và chế độ tiết kiệm pin của thiết bị.
 - Chất lượng âm thanh giữ nguyên theo tệp gốc và thiết bị phát. Ứng dụng không nâng cấp bitrate hoặc giả lập chất lượng lossless.

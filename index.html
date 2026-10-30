@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="animations.css" />
   <link rel="stylesheet" href="profile.css" />
+  <link rel="stylesheet" href="danh-dan/danh-dan.css" />
   <title>Pink Tune — Your music</title>
 </head>
 <body>
@@ -25,6 +26,7 @@
         <button class="nav-link" data-view="search"><span class="nav-icon">⌕</span>Tìm trong thư viện</button>
         <button class="nav-link" data-view="library"><span class="nav-icon">▤</span>Thư viện nhạc</button>
         <button class="nav-link" data-view="playlists"><span class="nav-icon">♫</span>Danh sách phát</button>
+        <button class="nav-link" data-view="danh-dan"><span class="nav-icon">♬</span>Đánh Đàn</button>
         <button class="nav-link" data-view="settings"><span class="nav-icon">⚙</span>Cài đặt</button>
       </nav>
       <div class="sidebar-rule"></div>
@@ -162,6 +164,80 @@
         </form>
       </section>
 
+      <section class="view jam-view" id="view-danh-dan" aria-labelledby="jam-title">
+        <div class="page-heading">
+          <p class="eyebrow">PINK TUNE STUDIO</p>
+          <h1 id="jam-title">Đánh Đàn</h1>
+          <p class="muted">Chọn hợp âm, chọn điệu rồi chơi theo cách của bạn.</p>
+        </div>
+
+        <div class="jam-workspace" id="jam-workspace" data-jam-theme="pink">
+          <section class="jam-now-card" aria-label="Hợp âm đang chọn">
+            <div class="jam-now-copy">
+              <span class="jam-overline" id="jam-now-caption">SẴN SÀNG CHƠI</span>
+              <strong id="jam-current-chord" aria-live="polite">C</strong>
+              <span id="jam-current-description">Đô trưởng</span>
+            </div>
+            <div class="jam-beat-meter" id="jam-beat-meter" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="jam-transport">
+              <button class="jam-play-button" id="jam-play-toggle" type="button" aria-pressed="false"><span aria-hidden="true">▶</span><span>Chạy điệu</span></button>
+              <button class="jam-stop-button" id="jam-stop" type="button" aria-label="Dừng điệu">■</button>
+            </div>
+            <p class="jam-status" id="jam-status" role="status" aria-live="polite">Chạm hợp âm để nghe thử, hoặc bấm Space để chạy điệu.</p>
+          </section>
+
+          <section class="jam-card jam-chord-card" aria-labelledby="jam-chord-heading">
+            <div class="jam-section-heading">
+              <div><p class="jam-overline">BÀN PHÍM HỢP ÂM</p><h2 id="jam-chord-heading">Chọn nốt và kiểu hợp âm</h2></div>
+              <span class="jam-keyboard-badge">⌨ Bàn phím + chạm</span>
+            </div>
+
+            <div class="jam-control-group">
+              <div class="jam-label-row"><span>Nốt gốc</span><span class="jam-help">Phím C, D, E, F, G, A, B</span></div>
+              <div class="jam-accidentals" role="group" aria-label="Dấu hóa">
+                <button type="button" class="jam-accidental active" data-accidental="0" aria-pressed="true">♮ Tự nhiên</button>
+                <button type="button" class="jam-accidental" data-accidental="1" aria-pressed="false">♯ Thăng</button>
+                <button type="button" class="jam-accidental" data-accidental="-1" aria-pressed="false">♭ Giáng</button>
+              </div>
+              <div class="jam-root-keys" role="group" aria-label="Chọn nốt gốc">
+                <button type="button" class="jam-root-key active" data-root="C" aria-pressed="true"><b>C</b><kbd>C</kbd></button>
+                <button type="button" class="jam-root-key" data-root="D" aria-pressed="false"><b>D</b><kbd>D</kbd></button>
+                <button type="button" class="jam-root-key" data-root="E" aria-pressed="false"><b>E</b><kbd>E</kbd></button>
+                <button type="button" class="jam-root-key" data-root="F" aria-pressed="false"><b>F</b><kbd>F</kbd></button>
+                <button type="button" class="jam-root-key" data-root="G" aria-pressed="false"><b>G</b><kbd>G</kbd></button>
+                <button type="button" class="jam-root-key" data-root="A" aria-pressed="false"><b>A</b><kbd>A</kbd></button>
+                <button type="button" class="jam-root-key" data-root="B" aria-pressed="false"><b>B</b><kbd>B</kbd></button>
+              </div>
+            </div>
+
+            <div class="jam-control-group">
+              <div class="jam-label-row"><span>Kiểu hợp âm</span><span class="jam-help">Phím M thêm “m”, phím 7 thêm “7”</span></div>
+              <div class="jam-quality-keys" role="group" aria-label="Chọn kiểu hợp âm">
+                <button type="button" class="jam-quality active" data-quality="major" aria-pressed="true"><b>Trưởng</b><small>C</small></button>
+                <button type="button" class="jam-quality" data-quality="minor" aria-pressed="false"><b>Thứ</b><small>Cm · M</small></button>
+                <button type="button" class="jam-quality" data-quality="seventh" aria-pressed="false"><b>7</b><small>C7 · 7</small></button>
+                <button type="button" class="jam-quality" data-quality="minorSeventh" aria-pressed="false"><b>Thứ 7</b><small>Cm7 · M + 7</small></button>
+              </div>
+            </div>
+            <p class="jam-keyboard-feedback" id="jam-keyboard-feedback" aria-live="polite">Máy tính: giữ C + M + 7 cùng lúc rồi thả để phát Cm7.</p>
+          </section>
+
+          <section class="jam-card jam-settings-card" aria-labelledby="jam-settings-heading">
+            <div class="jam-section-heading"><div><p class="jam-overline">TÙY CHỈNH PHẦN ĐỆM</p><h2 id="jam-settings-heading">Điệu và âm thanh</h2></div></div>
+            <div class="jam-settings-grid">
+              <label class="jam-field" for="jam-rhythm"><span>Điệu đệm</span><select id="jam-rhythm"><option value="pop">Pop 4/4</option><option value="ballad">Ballad</option><option value="waltz">Waltz 3/4</option><option value="rock">Rock 4/4</option><option value="sixEight">Slow 6/8</option></select></label>
+              <label class="jam-field" for="jam-instrument"><span>Nhạc cụ</span><select id="jam-instrument"><option value="guitar">Guitar</option><option value="piano">Piano</option><option value="ukulele">Ukulele</option></select></label>
+              <div class="jam-field jam-tempo-field"><span id="jam-tempo-label">Tốc độ</span><div class="jam-tempo-control"><button type="button" id="jam-tempo-down" aria-label="Giảm 5 BPM">−</button><input id="jam-tempo" type="number" min="40" max="200" step="1" value="90" inputmode="numeric" aria-labelledby="jam-tempo-label"><button type="button" id="jam-tempo-up" aria-label="Tăng 5 BPM">＋</button><small>BPM</small></div></div>
+              <div class="jam-field"><span>Giao diện</span><div class="jam-themes" role="group" aria-label="Chọn giao diện"><button type="button" class="jam-theme-choice active" data-theme="pink" aria-pressed="true"><i></i>Hồng</button><button type="button" class="jam-theme-choice" data-theme="mint" aria-pressed="false"><i></i>Bạc hà</button><button type="button" class="jam-theme-choice" data-theme="night" aria-pressed="false"><i></i>Tối</button></div></div>
+            </div>
+          </section>
+
+          <p class="jam-footnote">Âm thanh được tạo trực tiếp trên thiết bị. Khi đang chạy, hợp âm mới sẽ được đổi ở nhịp kế tiếp.</p>
+        </div>
+      </section>
+
       <footer class="app-footer">Pink Tune phát các tệp nhạc bạn thêm vào. Hãy dùng nội dung bạn có quyền sử dụng.</footer>
     </main>
   </div>
@@ -184,6 +260,7 @@
   <nav class="mobile-nav" aria-label="Điều hướng chính trên điện thoại">
     <button class="mobile-nav-item active" data-view="home"><span>⌂</span><small>Trang chủ</small></button>
     <button class="mobile-nav-item" data-view="search"><span>⌕</span><small>Tìm kiếm</small></button>
+    <button class="mobile-nav-item" data-view="danh-dan"><span>♬</span><small>Đánh Đàn</small></button>
     <button class="mobile-nav-item" data-view="library"><span>▤</span><small>Thư viện</small></button>
     <button class="mobile-nav-item" data-view="liked"><span>♡</span><small>Đã thích</small></button>
   </nav>
@@ -248,6 +325,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js" defer></script>
   <script src="supabase-config.js" defer></script>
+  <script src="danh-dan/danh-dan.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

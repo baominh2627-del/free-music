@@ -1,5 +1,5 @@
-const CACHE='pink-tune-v33';
-const CORE=['./','./index.html','./styles.css','./animations.css','./profile.css','./app.js','./manifest.webmanifest','./icon.svg','./supabase-config.js'];
+const CACHE='pink-tune-v34';
+const CORE=['./','./index.html','./styles.css','./animations.css','./profile.css','./danh-dan/danh-dan.css','./danh-dan/danh-dan.js','./app.js','./manifest.webmanifest','./icon.svg','./supabase-config.js'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(CORE);await self.skipWaiting();})()));
 self.addEventListener('message',event=>{if(event.data?.type==='ACTIVATE_UPDATE')event.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
