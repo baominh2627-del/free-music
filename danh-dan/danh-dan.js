@@ -10,7 +10,8 @@
     major: { suffix: '', label: 'trưởng', intervals: [0, 4, 7] },
     minor: { suffix: 'm', label: 'thứ', intervals: [0, 3, 7] },
     seventh: { suffix: '7', label: 'bảy', intervals: [0, 4, 7, 10] },
-    minorSeventh: { suffix: 'm7', label: 'thứ bảy', intervals: [0, 3, 7, 10] }
+    minorSeventh: { suffix: 'm7', label: 'thứ bảy', intervals: [0, 3, 7, 10] },
+    ninth: { suffix: '9', label: 'chín', intervals: [0, 4, 7, 10, 14] }
   };
   const rhythms = {
     pop: { label: 'Pop 4/4', beats: 4, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 1, direction: 'down', strength: 0.76 }, { beat: 1.5, direction: 'up', strength: 0.52 }, { beat: 2.5, direction: 'up', strength: 0.48 }, { beat: 3, direction: 'down', strength: 0.86 }, { beat: 3.5, direction: 'up', strength: 0.58 }] },
@@ -466,9 +467,10 @@
   function chordNotes(chord) {
     if (state.instrument === 'guitar') {
       const third = chord.quality === 'minor' || chord.quality === 'minorSeventh' ? 3 : 4;
-      const seventh = chord.quality === 'seventh' || chord.quality === 'minorSeventh';
+      const ninth = chord.quality === 'ninth';
+      const seventh = chord.quality === 'seventh' || chord.quality === 'minorSeventh' || ninth;
       const rootMidi = 36 + chord.pitchClass;
-      const offsets = [0, 7, 12, 12 + third, seventh ? 22 : 19, 24];
+      const offsets = [0, 7, 12, 12 + third, seventh ? 22 : 19, ninth ? 26 : 24];
       const notes = offsets.map(offset => rootMidi + offset);
       if (chord.bassPitchClass !== null) {
         const bassMidi = 36 + chord.bassPitchClass;
@@ -831,6 +833,7 @@
     if (Object.hasOwn(rootSemitones, key)) return key;
     if (key === 'M') return 'M';
     if (key === '7' || event.code === 'Digit7' || event.code === 'Numpad7') return '7';
+    if (key === '9' || event.code === 'Digit9' || event.code === 'Numpad9') return '9';
     return null;
   }
 
@@ -866,7 +869,8 @@
     state.keyboardBassPitchClass = roots.length === 2 ? rootSemitones[roots[1]] : null;
     const minor = state.pressed.has('M');
     const seventh = state.pressed.has('7');
-    const quality = minor ? seventh ? 'minorSeventh' : 'minor' : seventh ? 'seventh' : 'major';
+    const ninth = state.pressed.has('9');
+    const quality = ninth ? 'ninth' : minor ? seventh ? 'minorSeventh' : 'minor' : seventh ? 'seventh' : 'major';
     const root = roots[0];
     const accidental = state.accidental;
     const chord = makeChord(root, accidental, quality);
@@ -889,7 +893,7 @@
     state.gestureHadChord = false;
     state.keyboardBassPitchClass = null;
     releaseHeldChord('keyboard');
-    el('jam-keyboard-feedback').textContent = 'Máy tính: C + M + 7 tạo Cm7; giữ G rồi nhấn B tạo G/B; giữ E rồi nhấn 7 và B tạo E7/B.';
+    el('jam-keyboard-feedback').textContent = 'Máy tính: C + M + 7 tạo Cm7; C + 9 tạo C9; giữ G rồi nhấn B tạo G/B; giữ E rồi nhấn 7 và B tạo E7/B.';
   }
 
   view.querySelectorAll('[data-root]').forEach(button => {
