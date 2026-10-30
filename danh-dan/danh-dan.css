@@ -57,6 +57,44 @@
 .jam-reverb-toggle[aria-pressed="true"] i{background:var(--jam-accent)}
 .jam-reverb-toggle[aria-pressed="true"] i::after{transform:translateX(15px)}
 .jam-reverb-help{color:var(--jam-muted);font-size:10px;font-weight:500;line-height:1.4}
+.jam-variation-toggle{width:max-content;max-width:100%;min-height:46px;padding:0 14px;border:1px solid var(--jam-line);border-radius:12px;background:var(--jam-bg);color:var(--jam-muted);font-size:12px;font-weight:750}
+.jam-variation-toggle[aria-pressed="true"]{border-color:var(--jam-accent);background:var(--jam-surface-soft);color:var(--jam-accent-strong)}
+.jam-dynamics-field>span{display:flex;justify-content:space-between;gap:8px}
+.jam-dynamics-field output{color:var(--jam-accent-strong)}
+.jam-dynamics-field input{width:100%;margin:8px 0 0;accent-color:var(--jam-accent)}
+.jam-arrangement-intro{margin:-5px 0 14px;color:var(--jam-muted);font-size:11px;line-height:1.5}
+.jam-arrangement-keypad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.jam-arrangement-keypad button{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:7px;min-width:0;min-height:46px;padding:5px 8px;border:1px solid var(--jam-line);border-radius:11px;background:var(--jam-bg);color:var(--jam-text);text-align:left}
+.jam-arrangement-keypad button:hover,.jam-arrangement-keypad button:active{border-color:var(--jam-accent);background:var(--jam-surface-soft)}
+.jam-arrangement-keypad kbd{display:grid;place-items:center;width:23px;height:25px;border:1px solid var(--jam-line);border-radius:6px;background:var(--jam-surface);color:var(--jam-accent-strong);font:800 11px var(--font)}
+.jam-arrangement-keypad span{min-width:0;font-size:10px;font-weight:700;line-height:1.2}
+.jam-arrangement-subheading{display:flex;justify-content:space-between;gap:10px;margin:20px 0 9px;color:var(--jam-text);font-size:12px;font-weight:800}
+.jam-arrangement-subheading span:last-child{color:var(--jam-muted);font-size:10px;font-weight:600}
+.jam-arrangement-sequence{display:grid;gap:7px}
+.jam-arrangement-sequence:empty{display:none}
+.jam-arrangement-item{display:grid;grid-template-columns:26px minmax(50px,1fr) auto auto 29px;align-items:center;gap:5px;min-width:0;padding:7px;border:1px solid var(--jam-line);border-radius:11px;background:var(--jam-bg)}
+.jam-arrangement-order{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--jam-surface-soft);color:var(--jam-accent-strong);font-size:10px;font-weight:800}
+.jam-arrangement-section{display:grid;gap:3px;min-width:0}
+.jam-arrangement-section b{overflow:hidden;color:var(--jam-text);font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.jam-arrangement-section small{color:var(--jam-muted);font-size:9px}
+.jam-arrangement-bars,.jam-arrangement-move{display:flex;align-items:center;gap:3px}
+.jam-arrangement-bars button,.jam-arrangement-move button,.jam-arrangement-remove{display:grid;place-items:center;width:25px;height:29px;border:1px solid var(--jam-line);border-radius:7px;background:var(--jam-surface);color:var(--jam-muted);font-size:13px;font-weight:800}
+.jam-arrangement-bars b{min-width:25px;color:var(--jam-text);font-size:9px;text-align:center;white-space:nowrap}
+.jam-arrangement-move button:disabled,.jam-arrangement-bars button:disabled{opacity:.35;cursor:default}
+.jam-arrangement-remove{width:28px;color:var(--jam-accent-strong);font-size:16px}
+.jam-arrangement-current{border-color:var(--jam-accent);background:var(--jam-surface-soft);box-shadow:inset 0 0 0 1px var(--jam-accent)}
+.jam-arrangement-empty{display:grid;place-items:center;min-height:76px;padding:12px;border:1px dashed var(--jam-line);border-radius:11px;color:var(--jam-muted);text-align:center}
+.jam-arrangement-empty[hidden]{display:none}
+.jam-arrangement-empty span{color:var(--jam-accent-strong);font-size:17px;font-weight:800;letter-spacing:3px}
+.jam-arrangement-empty p{margin:5px 0 0;font-size:10px}
+.jam-arrangement-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.jam-arrangement-undo,.jam-arrangement-clear,.jam-arrangement-play{min-height:43px;padding:0 13px;border:1px solid var(--jam-line);border-radius:12px;background:var(--jam-bg);color:var(--jam-muted);font-size:11px;font-weight:750}
+.jam-arrangement-undo:disabled,.jam-arrangement-clear:disabled{opacity:.4;cursor:default}
+.jam-arrangement-play{margin-left:auto;border-color:var(--jam-accent);background:var(--jam-accent);color:#fff}
+.jam-workspace[data-jam-theme="night"] .jam-arrangement-play{color:#263017}
+.jam-arrangement-help,.jam-arrangement-status{margin:10px 0 0;color:var(--jam-muted);font-size:10px;line-height:1.5}
+.jam-arrangement-help kbd{padding:2px 5px;border:1px solid var(--jam-line);border-radius:5px;background:var(--jam-bg);color:var(--jam-text);font:700 9px var(--font)}
+.jam-arrangement-status:empty{display:none}
 .jam-themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .jam-theme-choice{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:42px;padding:0 6px;border:1px solid var(--jam-line);border-radius:11px;background:var(--jam-bg);color:var(--jam-muted);font-size:10px;font-weight:700}
 .jam-theme-choice.active{border-color:var(--jam-accent);color:var(--jam-accent-strong)}
@@ -96,11 +134,20 @@
   .jam-settings-grid{grid-template-columns:1fr;gap:13px}
   .jam-field select,.jam-tempo-control{height:48px}
   .jam-reverb-toggle{min-height:48px}
+  .jam-variation-toggle{min-height:48px}
   .jam-themes{grid-template-columns:repeat(3,minmax(0,1fr))}
   .jam-theme-choice{min-height:45px;font-size:11px}
   .mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr));padding-inline:3px}
   .mobile-nav-item{min-width:0;gap:2px}
   .mobile-nav-item small{max-width:100%;font-size:9px;white-space:nowrap;letter-spacing:-.25px}
+  .jam-arrangement-keypad{gap:5px}
+  .jam-arrangement-keypad button{grid-template-columns:21px minmax(0,1fr);gap:5px;min-height:48px;padding:4px 5px}
+  .jam-arrangement-keypad kbd{width:21px;height:24px}
+  .jam-arrangement-keypad span{font-size:9px}
+  .jam-arrangement-item{grid-template-columns:23px minmax(44px,1fr) auto auto 27px;gap:3px;padding:5px}
+  .jam-arrangement-bars button,.jam-arrangement-move button{width:23px;height:30px}
+  .jam-arrangement-remove{width:26px}
+  .jam-arrangement-play{flex:1}
 }
 @media(max-width:360px){
   .jam-now-card{padding-inline:12px}
@@ -111,4 +158,8 @@
   .jam-quality-keys{gap:3px}
   .jam-quality small{font-size:7px}
   .mobile-nav-item small{font-size:8px}
+  .jam-arrangement-keypad{gap:3px}
+  .jam-arrangement-keypad button{grid-template-columns:19px minmax(0,1fr);gap:3px;padding-inline:3px}
+  .jam-arrangement-keypad kbd{width:19px}
+  .jam-arrangement-keypad span{font-size:8px}
 }

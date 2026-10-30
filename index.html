@@ -232,10 +232,42 @@
               <div class="jam-field"><span>Âm vang</span><button class="jam-reverb-toggle" id="jam-reverb-toggle" type="button" aria-pressed="false"><i aria-hidden="true"></i><span>Vang dài</span></button><small class="jam-reverb-help">Bật để âm tiếp tục ngân sau khi thả hợp âm.</small></div>
               <div class="jam-field jam-tempo-field"><span id="jam-tempo-label">Tốc độ</span><div class="jam-tempo-control"><button type="button" id="jam-tempo-down" aria-label="Giảm 5 BPM">−</button><input id="jam-tempo" type="number" min="40" max="200" step="1" value="90" inputmode="numeric" aria-labelledby="jam-tempo-label"><button type="button" id="jam-tempo-up" aria-label="Tăng 5 BPM">＋</button><small>BPM</small></div></div>
               <div class="jam-field"><span>Giao diện</span><div class="jam-themes" role="group" aria-label="Chọn giao diện"><button type="button" class="jam-theme-choice active" data-theme="pink" aria-pressed="true"><i></i>Hồng</button><button type="button" class="jam-theme-choice" data-theme="mint" aria-pressed="false"><i></i>Bạc hà</button><button type="button" class="jam-theme-choice" data-theme="night" aria-pressed="false"><i></i>Tối</button></div></div>
+              <label class="jam-field" for="jam-pattern"><span>Mẫu đệm</span><select id="jam-pattern"><option value="strum">Quạt chả</option><option value="arpeggio">Rải hợp âm</option><option value="bassChord">Bass + hợp âm</option></select></label>
+              <label class="jam-field" for="jam-transition"><span>Chuyển đoạn</span><select id="jam-transition"><option value="fill">Câu nối cuối đoạn</option><option value="direct">Chuyển thẳng</option><option value="break">Nghỉ một phách</option><option value="stop">Ngắt rồi nhấn mạnh</option><option value="swell">Tăng dần cường độ</option></select></label>
+              <div class="jam-field"><span>Biến tấu</span><button class="jam-variation-toggle" id="jam-variation-toggle" type="button" aria-pressed="false">Tắt biến tấu</button><small class="jam-reverb-help">Đổi hướng quạt ở các ô nhịp xen kẽ.</small></div>
+              <label class="jam-field jam-dynamics-field" for="jam-dynamics"><span>Cường độ <output id="jam-dynamics-value" for="jam-dynamics">75%</output></span><input id="jam-dynamics" type="range" min="20" max="100" step="5" value="75"></label>
             </div>
           </section>
 
-          <p class="jam-footnote">Âm thanh được tạo trực tiếp trên thiết bị. Khi đang chạy, hợp âm mới sẽ được đổi ở nhịp kế tiếp.</p>
+          <section class="jam-card jam-arrangement-card" aria-labelledby="jam-arrangement-heading">
+            <div class="jam-section-heading">
+              <div><p class="jam-overline">SẮP XẾP BÀI HÁT</p><h2 id="jam-arrangement-heading">Trình tự phối khí</h2></div>
+              <span class="jam-keyboard-badge">⌨ Phím số 1–8</span>
+            </div>
+            <p class="jam-arrangement-intro">Bấm số để thêm phần bài hát theo thứ tự. Chỉnh số ô nhịp, đổi vị trí hoặc bỏ phần bất cứ lúc nào.</p>
+            <div class="jam-arrangement-keypad" role="group" aria-label="Thêm phần bài hát bằng phím số">
+              <button type="button" data-arrangement-key="1"><kbd>1</kbd><span>Mở đầu</span></button>
+              <button type="button" data-arrangement-key="2"><kbd>2</kbd><span>Phiên khúc</span></button>
+              <button type="button" data-arrangement-key="3"><kbd>3</kbd><span>Tiền điệp khúc</span></button>
+              <button type="button" data-arrangement-key="4"><kbd>4</kbd><span>Điệp khúc</span></button>
+              <button type="button" data-arrangement-key="5"><kbd>5</kbd><span>Cầu nối</span></button>
+              <button type="button" data-arrangement-key="6"><kbd>6</kbd><span>Dạo nhạc</span></button>
+              <button type="button" data-arrangement-key="7"><kbd>7</kbd><span>Câu nhạc nối</span></button>
+              <button type="button" data-arrangement-key="8"><kbd>8</kbd><span>Kết</span></button>
+            </div>
+            <div class="jam-arrangement-subheading"><span>Trình tự của bạn</span><span id="jam-arrangement-count">0 phần</span></div>
+            <div class="jam-arrangement-sequence" id="jam-arrangement-sequence" aria-live="polite"></div>
+            <div class="jam-arrangement-empty" id="jam-arrangement-empty"><span aria-hidden="true">1 → 2 → 4</span><p>Ví dụ: Mở đầu → Phiên khúc → Điệp khúc</p></div>
+            <div class="jam-arrangement-actions">
+              <button type="button" class="jam-arrangement-undo" id="jam-arrangement-undo">↶ Xóa bước cuối</button>
+              <button type="button" class="jam-arrangement-clear" id="jam-arrangement-clear">Xóa tất cả</button>
+              <button type="button" class="jam-arrangement-play" id="jam-arrangement-play">▶ Chạy phối khí</button>
+            </div>
+            <p class="jam-arrangement-help">Máy tính: nhấn <kbd>1–8</kbd> để thêm phần · <kbd>Backspace</kbd> xóa bước cuối · <kbd>Enter</kbd> phát trình tự. Phím <kbd>7</kbd> thả riêng thêm câu nối; giữ nốt gốc rồi nhấn <kbd>7</kbd> để tạo hợp âm 7.</p>
+            <p class="jam-arrangement-status" id="jam-arrangement-status" role="status" aria-live="polite">Chưa có trình tự phối khí.</p>
+          </section>
+
+          <p class="jam-footnote">Mẫu đệm, biến tấu, cường độ và chuyển đoạn đều áp dụng khi phát. Trình tự được lưu trên thiết bị.</p>
         </div>
       </section>
 
