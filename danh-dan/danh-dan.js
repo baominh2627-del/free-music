@@ -34,22 +34,28 @@
     rhythm: Object.hasOwn(rhythms, saved.rhythm) ? saved.rhythm : 'pop',
     instrument: ['guitar', 'piano', 'ukulele'].includes(saved.instrument) ? saved.instrument : 'guitar',
     theme: ['pink', 'mint', 'night'].includes(saved.theme) ? saved.theme : 'pink',
+    reverb: Boolean(saved.reverb),
     bpm: Number.isFinite(Number(saved.bpm)) ? Math.max(40, Math.min(200, Number(saved.bpm))) : 90,
     chord: null,
     pendingChord: null,
     playing: false,
     audio: null,
+    convolver: null,
+    reverbGain: null,
     timer: null,
     nextStepAt: 0,
     stepPosition: 0,
     pressed: new Set(),
     gesture: new Set(),
-    voices: new Set()
+    voices: new Set(),
+    heldVoices: [],
+    heldSource: null,
+    heldChord: null
   };
 
   function savePrefs() {
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ root: state.root, accidental: state.accidental, quality: state.quality, rhythm: state.rhythm, instrument: state.instrument, theme: state.theme, bpm: state.bpm }));
+      localStorage.setItem(storageKey, JSON.stringify({ root: state.root, accidental: state.accidental, quality: state.quality, rhythm: state.rhythm, instrument: state.instrument, theme: state.theme, reverb: state.reverb, bpm: state.bpm }));
     } catch { /* Preferences are optional when storage is unavailable. */ }
   }
 
@@ -96,6 +102,7 @@
     el('jam-instrument').value = state.instrument;
     el('jam-tempo').value = String(state.bpm);
     workspace.dataset.jamTheme = state.theme;
+    el('jam-reverb-toggle').setAttribute('aria-pressed', String(state.reverb));
     view.querySelectorAll('[data-accidental]').forEach(button => {
       const active = Number(button.dataset.accidental) === state.accidental;
       button.classList.toggle('active', active);
@@ -134,7 +141,7 @@
     updateChordDisplay();
     savePrefs();
     if (state.playing) {
-      setStatus(`${state.chord.name} sẽ vào ở nhịp kế tiếp.`);
+      setStatus(`${nextChord.name} sẽ vào ở nhịp kế tiếp.`);
     } else if (playPreview) {
       setStatus(`Đang nghe thử ${state.chord.name}. Bấm Space hoặc “Chạy điệu” để đệm liên tục.`);
       playSingleChord(state.chord).catch(() => {});
@@ -148,6 +155,24 @@
     const Context = window.AudioContext || window.webkitAudioContext;
     if (!Context) throw new Error('Trình duyệt này chưa hỗ trợ Web Audio. Hãy thử Chrome hoặc Safari mới hơn.');
     state.audio = new Context();
+    const context = state.audio;
+    const convolver = context.createConvolver();
+    const reverbGain = context.createGain();
+    const impulseLength = Math.floor(context.sampleRate * 4.2);
+    const impulse = context.createBuffer(2, impulseLength, context.sampleRate);
+    for (let channelIndex = 0; channelIndex < impulse.numberOfChannels; channelIndex++) {
+      const samples = impulse.getChannelData(channelIndex);
+      for (let index = 0; index < impulseLength; index++) {
+        const decay = (1 - index / impulseLength) ** 2.5;
+        samples[index] = (Math.random() * 2 - 1) * decay;
+      }
+    }
+    convolver.buffer = impulse;
+    reverbGain.gain.setValueAtTime(state.reverb ? 0.38 : 0, context.currentTime);
+    convolver.connect(reverbGain);
+    reverbGain.connect(context.destination);
+    state.convolver = convolver;
+    state.reverbGain = reverbGain;
     return state.audio;
   }
 
@@ -155,7 +180,7 @@
     return 440 * 2 ** ((midi - 69) / 12);
   }
 
-  function playVoice(frequency, at, strength, instrument) {
+  function playVoice(frequency, at, strength, instrument, { sustain = false } = {}) {
     const context = audioContext();
     const oscillator = context.createOscillator();
     const filter = context.createBiquadFilter();
@@ -166,16 +191,59 @@
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(instrument === 'ukulele' ? 2600 : 1900, at);
     envelope.gain.setValueAtTime(0.0001, at);
-    envelope.gain.exponentialRampToValueAtTime(Math.max(0.018, 0.105 * strength), at + 0.012);
-    envelope.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+    const peak = Math.max(0.018, 0.105 * strength);
+    envelope.gain.exponentialRampToValueAtTime(peak, at + 0.012);
+    if (sustain) envelope.gain.setValueAtTime(peak, at + 0.018);
+    else envelope.gain.exponentialRampToValueAtTime(0.0001, at + duration);
     oscillator.connect(filter);
     filter.connect(envelope);
     envelope.connect(context.destination);
-    const voice = { oscillator, envelope };
+    if (state.convolver) envelope.connect(state.convolver);
+    const voice = { oscillator, envelope, sustained: sustain };
     state.voices.add(voice);
     oscillator.onended = () => state.voices.delete(voice);
     oscillator.start(at);
-    oscillator.stop(at + duration + 0.02);
+    if (!sustain) oscillator.stop(at + duration + 0.02);
+    return voice;
+  }
+
+  function releaseVoice(voice) {
+    if (!voice || !state.audio) return;
+    const at = state.audio.currentTime;
+    try {
+      if (typeof voice.envelope.gain.cancelAndHoldAtTime === 'function') voice.envelope.gain.cancelAndHoldAtTime(at);
+      else {
+        voice.envelope.gain.cancelScheduledValues(at);
+        voice.envelope.gain.setValueAtTime(Math.max(0.0001, voice.envelope.gain.value), at);
+      }
+      voice.envelope.gain.setTargetAtTime(0.0001, at, state.reverb ? 0.035 : 0.008);
+      voice.oscillator.stop(at + 0.12);
+    } catch { /* The note may already have ended. */ }
+  }
+
+  async function startHeldChord(chord, source) {
+    releaseHeldChord();
+    state.heldSource = source;
+    state.heldChord = chord;
+    try {
+      const context = audioContext();
+      await context.resume();
+      if (state.heldSource !== source) return;
+      const baseMidi = state.instrument === 'guitar' ? 48 : 60;
+      const at = context.currentTime + 0.018;
+      state.heldVoices = chord.intervals.map(interval => playVoice(midiFrequency(baseMidi + chord.pitchClass + interval), at, 0.68, state.instrument, { sustain: true }));
+    } catch (error) {
+      if (state.heldSource === source) setStatus(error.message || 'Không khởi tạo được âm thanh.');
+    }
+  }
+
+  function releaseHeldChord(source = null) {
+    if (source && state.heldSource !== source) return;
+    const voices = state.heldVoices;
+    state.heldVoices = [];
+    state.heldSource = null;
+    state.heldChord = null;
+    voices.forEach(releaseVoice);
   }
 
   function strum(chord, at, direction = 'down', strength = 0.8) {
@@ -265,6 +333,11 @@
     state.playing = false;
     if (state.pendingChord) state.chord = state.pendingChord;
     state.pendingChord = null;
+    state.heldVoices = [];
+    state.heldSource = null;
+    state.heldChord = null;
+    state.pressed.clear();
+    state.gesture.clear();
     const context = state.audio;
     if (context) {
       const at = context.currentTime;
@@ -279,7 +352,7 @@
     updatePlayButton();
     updateChordDisplay();
     updateMeter();
-    if (!silent) setStatus('Đã dừng phần đệm. Chạm hợp âm để nghe thử.');
+    if (!silent) setStatus('Đã dừng phần đệm. Giữ hợp âm để phát thử.');
   }
 
   function updatePlayButton() {
@@ -314,6 +387,24 @@
     setStatus(`${rhythms[state.rhythm].label} · ${state.bpm} BPM · ${state.chord.name}`);
   }
 
+  function setReverb(enabled) {
+    state.reverb = Boolean(enabled);
+    if (state.reverbGain && state.audio) {
+      const at = state.audio.currentTime;
+      if (typeof state.reverbGain.gain.cancelAndHoldAtTime === 'function') state.reverbGain.gain.cancelAndHoldAtTime(at);
+      else state.reverbGain.gain.cancelScheduledValues(at);
+      state.reverbGain.gain.setTargetAtTime(state.reverb ? 0.38 : 0, at, 0.045);
+    }
+    el('jam-reverb-toggle').setAttribute('aria-pressed', String(state.reverb));
+    savePrefs();
+    setStatus(state.reverb ? 'Đã bật vang dài. Âm sẽ tiếp tục ngân sau khi thả hợp âm.' : 'Đã tắt vang dài. Âm sẽ ngắt nhanh khi thả hợp âm.');
+  }
+
+  function announceHeldChord(chord) {
+    if (state.playing) setStatus(`Đang giữ ${chord.name}; điệu đệm đổi sang hợp âm này ở nhịp kế tiếp.`);
+    else setStatus(`Đang giữ ${chord.name}; thả phím để ngắt${state.reverb ? ', âm vang sẽ còn ngân.' : '.'}`);
+  }
+
   function setQuality(value) {
     if (!qualities[value]) return;
     setChord({ quality: value, playPreview: false });
@@ -335,31 +426,70 @@
     return !!document.querySelector('dialog[open]') || !el('now-playing-screen').hidden;
   }
 
-  function resolveGesture(keys) {
-    const roots = [...keys].filter(key => Object.hasOwn(rootSemitones, key));
-    if (roots.length !== 1) {
-      setStatus('Tổ hợp cần đúng một nốt gốc: C, D, E, F, G, A hoặc B.');
-      el('jam-keyboard-feedback').textContent = 'Thử lại: giữ một nốt gốc, có thể thêm M và/hoặc 7.';
+  function syncKeyboardChord() {
+    const roots = [...state.pressed].filter(key => Object.hasOwn(rootSemitones, key));
+    if (!roots.length) {
+      releaseHeldChord('keyboard');
+      if (state.pressed.size) el('jam-keyboard-feedback').textContent = `Đang giữ: ${[...state.pressed].join(' + ')} · chờ nốt gốc.`;
+      else {
+        el('jam-keyboard-feedback').textContent = state.reverb ? 'Đã thả phím — hợp âm đang ngân vang.' : 'Thả hết phím — âm đã ngắt.';
+        if (state.playing) setStatus(`${(state.pendingChord || state.chord).name} tiếp tục theo điệu đệm.`);
+        else setStatus(state.reverb ? 'Đã thả hợp âm; âm vang đang ngân.' : 'Đã thả hợp âm; âm đã ngắt.');
+      }
       return;
     }
-    const minor = keys.has('M');
-    const seventh = keys.has('7');
+    if (roots.length !== 1) {
+      releaseHeldChord('keyboard');
+      setStatus('Tổ hợp cần đúng một nốt gốc: C, D, E, F, G, A hoặc B.');
+      el('jam-keyboard-feedback').textContent = `Đang giữ nhiều nốt gốc: ${roots.join(' + ')}. Chỉ giữ một nốt gốc.`;
+      return;
+    }
+    const minor = state.pressed.has('M');
+    const seventh = state.pressed.has('7');
     const quality = minor ? seventh ? 'minorSeventh' : 'minor' : seventh ? 'seventh' : 'major';
     const root = roots[0];
     const accidental = state.accidental;
-    el('jam-keyboard-feedback').textContent = `Vừa bấm: ${rootLabel(root, accidental)}${qualities[quality].suffix} · giữ nốt gốc cùng M/7 rồi thả để chơi.`;
-    setChord({ root, accidental, quality, playPreview: true });
+    const chord = makeChord(root, accidental, quality);
+    el('jam-keyboard-feedback').textContent = `Đang giữ ${rootLabel(root, accidental)}${qualities[quality].suffix} · thả phím để ngắt.`;
+    if (state.heldSource === 'keyboard' && state.heldChord?.name === chord.name) return;
+    setChord({ root, accidental, quality, playPreview: false });
+    startHeldChord(chord, 'keyboard');
+    announceHeldChord(chord);
   }
 
   function clearGesture() {
     state.pressed.clear();
     state.gesture.clear();
-    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C + M + 7 cùng lúc rồi thả để phát Cm7.';
+    releaseHeldChord('keyboard');
+    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C + M + 7 để phát Cm7; thả phím để ngắt.';
   }
 
-  view.querySelectorAll('[data-root]').forEach(button => button.addEventListener('click', () => {
-    setChord({ root: button.dataset.root, playPreview: true });
-  }));
+  view.querySelectorAll('[data-root]').forEach(button => {
+    button.addEventListener('pointerdown', event => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      event.preventDefault();
+      const source = `pointer:${event.pointerId}`;
+      try { button.setPointerCapture(event.pointerId); } catch { /* Capture is optional. */ }
+      setChord({ root: button.dataset.root, playPreview: false });
+      const chord = makeChord();
+      startHeldChord(chord, source);
+      announceHeldChord(chord);
+    });
+    const releasePointer = event => {
+      const source = `pointer:${event.pointerId}`;
+      if (state.heldSource !== source) return;
+      releaseHeldChord(source);
+      setStatus(state.playing ? `${(state.pendingChord || state.chord).name} tiếp tục theo điệu đệm.` : state.reverb ? 'Đã thả hợp âm; âm vang đang ngân.' : 'Đã thả hợp âm; âm đã ngắt.');
+    };
+    button.addEventListener('pointerup', releasePointer);
+    button.addEventListener('pointercancel', releasePointer);
+    button.addEventListener('lostpointercapture', releasePointer);
+    button.addEventListener('click', event => {
+      if (event.detail !== 0) return;
+      setChord({ root: button.dataset.root, playPreview: false });
+      playSingleChord(makeChord());
+    });
+  });
   view.querySelectorAll('[data-quality]').forEach(button => button.addEventListener('click', () => setQuality(button.dataset.quality)));
   view.querySelectorAll('[data-accidental]').forEach(button => button.addEventListener('click', () => {
     const accidental = Number(button.dataset.accidental);
@@ -375,6 +505,7 @@
   }));
   el('jam-play-toggle').addEventListener('click', togglePlay);
   el('jam-stop').addEventListener('click', () => stop());
+  el('jam-reverb-toggle').addEventListener('click', () => setReverb(!state.reverb));
   el('jam-rhythm').addEventListener('change', event => setRhythm(event.target.value));
   el('jam-instrument').addEventListener('change', event => {
     state.instrument = event.target.value;
@@ -403,34 +534,40 @@
     if (event.repeat) return;
     state.pressed.add(token);
     state.gesture.add(token);
-    el('jam-keyboard-feedback').textContent = `Đang giữ: ${[...state.gesture].join(' + ')}`;
+    syncKeyboardChord();
   });
 
   document.addEventListener('keyup', event => {
     if (!view.classList.contains('active')) return;
     const token = keyboardToken(event);
-    if (!token || !state.gesture.has(token)) return;
+    if (!token || !state.pressed.has(token)) return;
     event.preventDefault();
     state.pressed.delete(token);
-    if (!state.pressed.size) {
-      const gesture = new Set(state.gesture);
-      state.gesture.clear();
-      if (isOverlayOpen()) el('jam-keyboard-feedback').textContent = 'Đã hủy tổ hợp phím khi một cửa sổ đang mở.';
-      else resolveGesture(gesture);
-    } else {
-      el('jam-keyboard-feedback').textContent = `Đang giữ: ${[...state.gesture].join(' + ')}`;
-    }
+    state.gesture.delete(token);
+    if (isOverlayOpen()) {
+      releaseHeldChord('keyboard');
+      el('jam-keyboard-feedback').textContent = 'Đã ngắt hợp âm khi một cửa sổ đang mở.';
+    } else syncKeyboardChord();
   });
 
   const viewObserver = new MutationObserver(() => {
     if (!view.classList.contains('active')) {
       if (state.playing) stop({ silent: true });
+      else releaseHeldChord();
       clearGesture();
     }
   });
   viewObserver.observe(view, { attributes: true, attributeFilter: ['class'] });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden && state.playing) stop({ silent: true });
+    if (document.hidden) {
+      if (state.playing) stop({ silent: true });
+      else releaseHeldChord();
+    }
+  });
+  window.addEventListener('blur', () => {
+    state.pressed.clear();
+    state.gesture.clear();
+    releaseHeldChord();
   });
 
   updateSettingsUI();
