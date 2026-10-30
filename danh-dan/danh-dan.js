@@ -44,6 +44,10 @@
     root: Object.hasOwn(rootSemitones, saved.root) ? saved.root : 'C',
     accidental: [-1, 0, 1].includes(Number(saved.accidental)) ? Number(saved.accidental) : 0,
     quality: Object.hasOwn(qualities, saved.quality) ? saved.quality : 'major',
+    toneShift: Number.isFinite(Number(saved.toneShift)) ? Math.max(-12, Math.min(12, Math.round(Number(saved.toneShift)))) : 0,
+    capo: Number.isFinite(Number(saved.capo)) ? Math.max(0, Math.min(12, Math.round(Number(saved.capo)))) : 0,
+    bassPitchClass: saved.bassPitchClass !== null && saved.bassPitchClass !== '' && Number.isInteger(Number(saved.bassPitchClass)) ? Math.max(0, Math.min(11, Number(saved.bassPitchClass))) : null,
+    keyboardBassPitchClass: null,
     rhythm: Object.hasOwn(rhythms, saved.rhythm) ? saved.rhythm : 'pop',
     instrument: ['guitar', 'piano', 'ukulele'].includes(saved.instrument) ? saved.instrument : 'guitar',
     theme: ['pink', 'mint', 'night'].includes(saved.theme) ? saved.theme : 'pink',
@@ -85,7 +89,7 @@
 
   function savePrefs() {
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ root: state.root, accidental: state.accidental, quality: state.quality, rhythm: state.rhythm, instrument: state.instrument, theme: state.theme, reverb: state.reverb, accompaniment: state.accompaniment, variation: state.variation, dynamics: state.dynamics, transition: state.transition, sequence: state.sequence, bpm: state.bpm }));
+      localStorage.setItem(storageKey, JSON.stringify({ root: state.root, accidental: state.accidental, quality: state.quality, toneShift: state.toneShift, capo: state.capo, bassPitchClass: state.bassPitchClass, rhythm: state.rhythm, instrument: state.instrument, theme: state.theme, reverb: state.reverb, accompaniment: state.accompaniment, variation: state.variation, dynamics: state.dynamics, transition: state.transition, sequence: state.sequence, bpm: state.bpm }));
     } catch { /* Preferences are optional when storage is unavailable. */ }
   }
 
@@ -101,9 +105,17 @@
     return `${rootNames[root]}${accidental === 1 ? ' thăng' : accidental === -1 ? ' giáng' : ''}`;
   }
 
-  function makeChord(root = state.root, accidental = state.accidental, quality = state.quality) {
+  const chromaticNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+
+  function makeChord(root = state.root, accidental = state.accidental, quality = state.quality, bassPitchClass = state.keyboardBassPitchClass ?? state.bassPitchClass) {
     const spec = qualities[quality];
-    return { root, accidental, quality, name: `${rootLabel(root, accidental)}${spec.suffix}`, label: spec.label, pitchClass: rootPitchClass(root, accidental), intervals: spec.intervals };
+    const shift = state.toneShift + state.capo;
+    const slash = bassPitchClass === null ? '' : `/${chromaticNames[bassPitchClass]}`;
+    return {
+      root, accidental, quality, bassPitchClass: bassPitchClass === null ? null : bassPitchClass + shift,
+      name: `${rootLabel(root, accidental)}${spec.suffix}${slash}`, label: spec.label,
+      pitchClass: rootPitchClass(root, accidental) + shift, intervals: spec.intervals
+    };
   }
 
   state.chord = makeChord();
@@ -112,7 +124,8 @@
     if (!state.pendingChord) state.chord = makeChord();
     const visibleChord = state.pendingChord || state.chord;
     el('jam-current-chord').textContent = visibleChord.name;
-    el('jam-current-description').textContent = `${rootName()} ${visibleChord.label}`;
+    const toneLabel = state.toneShift > 0 ? `+${state.toneShift}` : String(state.toneShift);
+    el('jam-current-description').textContent = `${rootName(visibleChord.root, visibleChord.accidental)} ${visibleChord.label} · dịch ${toneLabel} · capo ${state.capo}`;
     el('jam-now-caption').textContent = state.playing ? 'ĐANG ĐỆM HỢP ÂM' : 'SẴN SÀNG CHƠI';
     view.querySelectorAll('[data-root]').forEach(button => {
       const active = button.dataset.root === state.root;
@@ -140,6 +153,15 @@
     el('jam-reverb-toggle').setAttribute('aria-pressed', String(state.reverb));
     el('jam-variation-toggle').setAttribute('aria-pressed', String(state.variation));
     el('jam-variation-toggle').textContent = state.variation ? 'Bật biến tấu' : 'Tắt biến tấu';
+    el('jam-slash-bass').value = state.bassPitchClass === null ? '' : String(state.bassPitchClass);
+    el('jam-tone-value').value = `${state.toneShift > 0 ? '+' : ''}${state.toneShift} bán cung`;
+    el('jam-tone-value').textContent = el('jam-tone-value').value;
+    el('jam-capo-value').value = `${state.capo} ngăn`;
+    el('jam-capo-value').textContent = el('jam-capo-value').value;
+    el('jam-tone-down').disabled = state.toneShift <= -12;
+    el('jam-tone-up').disabled = state.toneShift >= 12;
+    el('jam-capo-down').disabled = state.capo <= 0;
+    el('jam-capo-up').disabled = state.capo >= 12;
     view.querySelectorAll('[data-accidental]').forEach(button => {
       const active = Number(button.dataset.accidental) === state.accidental;
       button.classList.toggle('active', active);
@@ -300,7 +322,9 @@
       if (state.heldSource !== source) return;
       const baseMidi = state.instrument === 'guitar' ? 48 : 60;
       const at = context.currentTime + 0.018;
-      state.heldVoices = chord.intervals.map(interval => playVoice(midiFrequency(baseMidi + chord.pitchClass + interval), at, 0.68, state.instrument, { sustain: true }));
+      const notes = chord.intervals.map(interval => baseMidi + chord.pitchClass + interval);
+      if (chord.bassPitchClass !== null) notes.unshift(baseMidi - 12 + chord.bassPitchClass);
+      state.heldVoices = notes.map(note => playVoice(midiFrequency(note), at, 0.68, state.instrument, { sustain: true }));
     } catch (error) {
       if (state.heldSource === source) setStatus(error.message || 'Không khởi tạo được âm thanh.');
     }
@@ -320,6 +344,7 @@
     const context = audioContext();
     const baseMidi = state.instrument === 'guitar' ? 48 : 60;
     const notes = chord.intervals.map(interval => baseMidi + chord.pitchClass + interval);
+    if (chord.bassPitchClass !== null) notes.unshift(baseMidi - 12 + chord.bassPitchClass);
     if (direction === 'up') notes.reverse();
     if (state.accompaniment === 'arpeggio' && direction !== 'pick') {
       const note = notes[state.arpeggioIndex % notes.length];
@@ -354,7 +379,8 @@
   function playAccompanimentHit(hit, at, strength) {
     if (state.accompaniment === 'bassChord' && Number.isInteger(hit.beat) && hit.beat % 2 === 0) {
       const baseMidi = state.instrument === 'guitar' ? 48 : 60;
-      playVoice(midiFrequency(Math.max(36, baseMidi - 12 + state.chord.pitchClass)), at, strength * 0.95, state.instrument);
+      const bassPitchClass = state.chord.bassPitchClass ?? state.chord.pitchClass;
+      playVoice(midiFrequency(Math.max(36, baseMidi - 12 + bassPitchClass)), at, strength * 0.95, state.instrument);
       strum(state.chord, at + 0.035, hit.direction, strength * 0.62);
       return;
     }
@@ -647,6 +673,7 @@
   function syncKeyboardChord() {
     const roots = [...state.pressed].filter(key => Object.hasOwn(rootSemitones, key));
     if (!roots.length) {
+      state.keyboardBassPitchClass = null;
       releaseHeldChord('keyboard');
       if (state.pendingSevenSection && state.pressed.has('7')) el('jam-keyboard-feedback').textContent = 'Giữ 7 rồi thêm nốt gốc để tạo hợp âm bảy; thả riêng 7 để thêm Câu nhạc nối.';
       else if (state.pressed.size) el('jam-keyboard-feedback').textContent = `Đang giữ: ${[...state.pressed].join(' + ')} · chờ nốt gốc.`;
@@ -657,20 +684,22 @@
       }
       return;
     }
-    if (roots.length !== 1) {
+    if (roots.length > 2) {
+      state.keyboardBassPitchClass = null;
       releaseHeldChord('keyboard');
-      setStatus('Tổ hợp cần đúng một nốt gốc: C, D, E, F, G, A hoặc B.');
-      el('jam-keyboard-feedback').textContent = `Đang giữ nhiều nốt gốc: ${roots.join(' + ')}. Chỉ giữ một nốt gốc.`;
+      setStatus('Tổ hợp hỗ trợ tối đa hai nốt: nốt gốc trước, nốt bass sau.');
+      el('jam-keyboard-feedback').textContent = `Đang giữ ${roots.join(' + ')}. Thả bớt nốt để chọn một hợp âm slash.`;
       return;
     }
+    state.keyboardBassPitchClass = roots.length === 2 ? rootSemitones[roots[1]] : null;
     const minor = state.pressed.has('M');
     const seventh = state.pressed.has('7');
     const quality = minor ? seventh ? 'minorSeventh' : 'minor' : seventh ? 'seventh' : 'major';
     const root = roots[0];
     const accidental = state.accidental;
     const chord = makeChord(root, accidental, quality);
-    el('jam-keyboard-feedback').textContent = `Đang giữ ${rootLabel(root, accidental)}${qualities[quality].suffix} · thả phím để ngắt.`;
-    if (state.heldSource === 'keyboard' && state.heldChord?.name === chord.name) return;
+    el('jam-keyboard-feedback').textContent = `Đang giữ ${chord.name}${roots.length === 2 ? ' · nốt thứ hai là bass' : ''} · thả phím để ngắt.`;
+    if (state.heldSource === 'keyboard' && state.heldChord?.name === chord.name && state.heldChord?.pitchClass === chord.pitchClass && state.heldChord?.bassPitchClass === chord.bassPitchClass) return;
     setChord({ root, accidental, quality, playPreview: false });
     startHeldChord(chord, 'keyboard');
     announceHeldChord(chord);
@@ -681,14 +710,16 @@
     state.gesture.clear();
     state.pendingSevenSection = false;
     state.gestureHadChord = false;
+    state.keyboardBassPitchClass = null;
     releaseHeldChord('keyboard');
-    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C + M + 7 để phát Cm7; thả phím để ngắt.';
+    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C + M + 7 để phát Cm7, hoặc giữ G rồi nhấn B để tạo G/B; thả phím để ngắt.';
   }
 
   view.querySelectorAll('[data-root]').forEach(button => {
     button.addEventListener('pointerdown', event => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       event.preventDefault();
+      state.keyboardBassPitchClass = null;
       const source = `pointer:${event.pointerId}`;
       try { button.setPointerCapture(event.pointerId); } catch { /* Capture is optional. */ }
       setChord({ root: button.dataset.root, playPreview: false });
@@ -712,6 +743,25 @@
     });
   });
   view.querySelectorAll('[data-quality]').forEach(button => button.addEventListener('click', () => setQuality(button.dataset.quality)));
+  el('jam-slash-bass').addEventListener('change', event => {
+    state.bassPitchClass = event.target.value === '' ? null : Number(event.target.value);
+    state.keyboardBassPitchClass = null;
+    setChord({ playPreview: false });
+    if (state.pressed.size) syncKeyboardChord();
+    if (!state.playing && !state.pressed.size) setStatus(state.bassPitchClass === null ? `Đã bỏ nốt bass riêng. Chạm nốt gốc để phát ${state.chord.name}.` : `Đã chọn bass ${chromaticNames[state.bassPitchClass]}. Chạm nốt gốc để phát ${state.chord.name}.`);
+  });
+  const adjustPitchSetting = (setting, amount) => {
+    if (setting === 'toneShift') state.toneShift = Math.max(-12, Math.min(12, state.toneShift + amount));
+    else state.capo = Math.max(0, Math.min(12, state.capo + amount));
+    updateSettingsUI();
+    setChord({ playPreview: false });
+    if (state.pressed.size) syncKeyboardChord();
+    else if (!state.playing) setStatus(`Đã đổi cao độ: ${state.chord.name} · dịch tông ${state.toneShift > 0 ? '+' : ''}${state.toneShift} · capo ${state.capo}.`);
+  };
+  el('jam-tone-down').addEventListener('click', () => adjustPitchSetting('toneShift', -1));
+  el('jam-tone-up').addEventListener('click', () => adjustPitchSetting('toneShift', 1));
+  el('jam-capo-down').addEventListener('click', () => adjustPitchSetting('capo', -1));
+  el('jam-capo-up').addEventListener('click', () => adjustPitchSetting('capo', 1));
   view.querySelectorAll('[data-accidental]').forEach(button => button.addEventListener('click', () => {
     const accidental = Number(button.dataset.accidental);
     setChord({ accidental, playPreview: false });
@@ -868,6 +918,7 @@
   window.addEventListener('blur', () => {
     state.pressed.clear();
     state.gesture.clear();
+    state.keyboardBassPitchClass = null;
     state.pendingSevenSection = false;
     state.gestureHadChord = false;
     releaseHeldChord();
