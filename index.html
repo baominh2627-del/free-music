@@ -185,7 +185,7 @@
               <button class="jam-play-button" id="jam-play-toggle" type="button" aria-pressed="false"><span aria-hidden="true">▶</span><span>Chạy điệu</span></button>
               <button class="jam-stop-button" id="jam-stop" type="button" aria-label="Dừng điệu">■</button>
             </div>
-            <p class="jam-status" id="jam-status" role="status" aria-live="polite">Giữ hợp âm để phát; thả ra để ngắt, hoặc bấm Space để chạy điệu.</p>
+            <p class="jam-status" id="jam-status" role="status" aria-live="polite">Bấm “Chạy điệu” một lần để trống, bass và phần guitar đệm chạy liên tục; bạn chỉ cần đổi hợp âm.</p>
           </section>
 
           <section class="jam-card jam-chord-card" aria-labelledby="jam-chord-heading">
@@ -240,7 +240,7 @@
               <div class="jam-field"><span>Âm vang</span><button class="jam-reverb-toggle" id="jam-reverb-toggle" type="button" aria-pressed="false"><i aria-hidden="true"></i><span>Vang dài</span></button><small class="jam-reverb-help">Bật để âm tiếp tục ngân sau khi thả hợp âm.</small></div>
               <div class="jam-field jam-tempo-field"><span id="jam-tempo-label">Tốc độ</span><div class="jam-tempo-control"><button type="button" id="jam-tempo-down" aria-label="Giảm 5 BPM">−</button><input id="jam-tempo" type="number" min="40" max="200" step="1" value="90" inputmode="numeric" aria-labelledby="jam-tempo-label"><button type="button" id="jam-tempo-up" aria-label="Tăng 5 BPM">＋</button><small>BPM</small></div></div>
               <div class="jam-field"><span>Giao diện</span><div class="jam-themes" role="group" aria-label="Chọn giao diện"><button type="button" class="jam-theme-choice active" data-theme="pink" aria-pressed="true"><i></i>Hồng</button><button type="button" class="jam-theme-choice" data-theme="mint" aria-pressed="false"><i></i>Bạc hà</button><button type="button" class="jam-theme-choice" data-theme="night" aria-pressed="false"><i></i>Tối</button></div></div>
-              <label class="jam-field" for="jam-pattern"><span>Mẫu đệm</span><select id="jam-pattern"><option value="strum">Quạt chả</option><option value="arpeggio">Rải hợp âm</option><option value="bassChord">Bass + hợp âm</option></select></label>
+              <label class="jam-field" for="jam-pattern"><span>Mẫu đệm</span><select id="jam-pattern"><option value="strum">Quạt chả</option><option value="arpeggio">Rải hợp âm</option><option value="bassChord">Bass + hợp âm</option></select><small class="jam-reverb-help">Trống và guitar bass chạy nền; đổi hợp âm sẽ vào ở nhịp kế.</small></label>
               <label class="jam-field" for="jam-transition"><span>Chuyển đoạn</span><select id="jam-transition"><option value="fill">Câu nối cuối đoạn</option><option value="direct">Chuyển thẳng</option><option value="break">Nghỉ một phách</option><option value="stop">Ngắt rồi nhấn mạnh</option><option value="swell">Tăng dần cường độ</option></select></label>
               <div class="jam-field"><span>Biến tấu</span><button class="jam-variation-toggle" id="jam-variation-toggle" type="button" aria-pressed="false">Tắt biến tấu</button><small class="jam-reverb-help">Đổi hướng quạt ở các ô nhịp xen kẽ.</small></div>
               <label class="jam-field jam-dynamics-field" for="jam-dynamics"><span>Cường độ <output id="jam-dynamics-value" for="jam-dynamics">75%</output></span><input id="jam-dynamics" type="range" min="20" max="100" step="5" value="75"></label>
@@ -275,7 +275,7 @@
             <p class="jam-arrangement-status" id="jam-arrangement-status" role="status" aria-live="polite">Chưa có trình tự phối khí.</p>
           </section>
 
-          <p class="jam-footnote">Mẫu đệm, biến tấu, cường độ và chuyển đoạn đều áp dụng khi phát. Trình tự được lưu trên thiết bị.</p>
+          <p class="jam-footnote">Chọn Pop, Ballad, Waltz, Rock hoặc 6/8; trống, bass và phần quạt/rải sẽ tự lặp theo BPM khi đang phát. Trình tự phối khí được lưu trên thiết bị.</p>
         </div>
       </section>
 

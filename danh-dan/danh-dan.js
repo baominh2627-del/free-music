@@ -13,11 +13,11 @@
     minorSeventh: { suffix: 'm7', label: 'thứ bảy', intervals: [0, 3, 7, 10] }
   };
   const rhythms = {
-    pop: { label: 'Pop 4/4', beats: 4, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 1, direction: 'up', strength: 0.62 }, { beat: 2, direction: 'down', strength: 0.84 }, { beat: 3, direction: 'up', strength: 0.62 }] },
-    ballad: { label: 'Ballad', beats: 4, hits: [{ beat: 0, direction: 'down', strength: 0.92 }, { beat: 0.75, direction: 'pick', strength: 0.48 }, { beat: 1.5, direction: 'down', strength: 0.64 }, { beat: 2, direction: 'down', strength: 0.8 }, { beat: 3, direction: 'up', strength: 0.54 }] },
+    pop: { label: 'Pop 4/4', beats: 4, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 1, direction: 'down', strength: 0.76 }, { beat: 1.5, direction: 'up', strength: 0.52 }, { beat: 2.5, direction: 'up', strength: 0.48 }, { beat: 3, direction: 'down', strength: 0.86 }, { beat: 3.5, direction: 'up', strength: 0.58 }] },
+    ballad: { label: 'Ballad', beats: 4, hits: [{ beat: 0, direction: 'down', strength: 0.96 }, { beat: 0.75, direction: 'pick', strength: 0.46 }, { beat: 1.5, direction: 'down', strength: 0.58 }, { beat: 2, direction: 'down', strength: 0.76 }, { beat: 2.5, direction: 'up', strength: 0.43 }, { beat: 3, direction: 'up', strength: 0.62 }] },
     waltz: { label: 'Waltz 3/4', beats: 3, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 1, direction: 'up', strength: 0.52 }, { beat: 2, direction: 'up', strength: 0.62 }] },
-    rock: { label: 'Rock 4/4', beats: 4, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 0.5, direction: 'up', strength: 0.56 }, { beat: 1, direction: 'down', strength: 0.78 }, { beat: 1.5, direction: 'up', strength: 0.56 }, { beat: 2, direction: 'down', strength: 0.92 }, { beat: 2.5, direction: 'up', strength: 0.58 }, { beat: 3, direction: 'down', strength: 0.78 }, { beat: 3.5, direction: 'up', strength: 0.58 }] },
-    sixEight: { label: 'Slow 6/8', beats: 3, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 0.5, direction: 'up', strength: 0.48 }, { beat: 1, direction: 'up', strength: 0.62 }, { beat: 1.5, direction: 'down', strength: 0.78 }, { beat: 2, direction: 'up', strength: 0.5 }, { beat: 2.5, direction: 'up', strength: 0.64 }] }
+    rock: { label: 'Rock 4/4', beats: 4, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 0.5, direction: 'up', strength: 0.48 }, { beat: 1, direction: 'down', strength: 0.78 }, { beat: 1.5, direction: 'up', strength: 0.48 }, { beat: 2, direction: 'down', strength: 0.92 }, { beat: 2.5, direction: 'up', strength: 0.5 }, { beat: 3, direction: 'down', strength: 0.78 }, { beat: 3.5, direction: 'up', strength: 0.52 }] },
+    sixEight: { label: 'Slow 6/8', beats: 3, hits: [{ beat: 0, direction: 'down', strength: 1 }, { beat: 0.5, direction: 'up', strength: 0.44 }, { beat: 1, direction: 'up', strength: 0.58 }, { beat: 1.5, direction: 'down', strength: 0.78 }, { beat: 2, direction: 'up', strength: 0.48 }, { beat: 2.5, direction: 'up', strength: 0.6 }] }
   };
   const sectionKeys = [
     { key: '1', id: 'intro', name: 'Mở đầu', defaultBars: 2, intensity: 0.64 },
@@ -72,6 +72,7 @@
     pendingChord: null,
     playing: false,
     audio: null,
+    noiseBuffer: null,
     convolver: null,
     reverbGain: null,
     timer: null,
@@ -264,6 +265,10 @@
     reverbGain.connect(context.destination);
     state.convolver = convolver;
     state.reverbGain = reverbGain;
+    const noiseBuffer = context.createBuffer(1, context.sampleRate, context.sampleRate);
+    const noise = noiseBuffer.getChannelData(0);
+    for (let index = 0; index < noise.length; index++) noise[index] = Math.random() * 2 - 1;
+    state.noiseBuffer = noiseBuffer;
     return state.audio;
   }
 
@@ -271,16 +276,16 @@
     return 440 * 2 ** ((midi - 69) / 12);
   }
 
-  function playVoice(frequency, at, strength, instrument, { sustain = false } = {}) {
+  function playVoice(frequency, at, strength, instrument, { sustain = false, duration: durationOverride = null } = {}) {
     const context = audioContext();
     const oscillator = context.createOscillator();
     const filter = context.createBiquadFilter();
     const envelope = context.createGain();
-    const duration = instrument === 'piano' ? 0.48 : instrument === 'ukulele' ? 0.25 : 0.34;
-    oscillator.type = instrument === 'piano' ? 'sine' : instrument === 'ukulele' ? 'sawtooth' : 'triangle';
+    const duration = Number.isFinite(durationOverride) ? Math.max(0.08, durationOverride) : instrument === 'piano' ? 0.48 : instrument === 'ukulele' ? 0.25 : instrument === 'bass' ? 0.28 : 0.34;
+    oscillator.type = instrument === 'piano' || instrument === 'bass' ? 'sine' : instrument === 'ukulele' ? 'sawtooth' : 'triangle';
     oscillator.frequency.setValueAtTime(frequency, at);
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(instrument === 'ukulele' ? 2600 : 1900, at);
+    filter.frequency.setValueAtTime(instrument === 'bass' ? 720 : instrument === 'ukulele' ? 2600 : 1900, at);
     envelope.gain.setValueAtTime(0.0001, at);
     const peak = Math.max(0.0002, 0.105 * strength * (state.dynamics / 100) * currentSectionIntensity());
     envelope.gain.exponentialRampToValueAtTime(peak, at + 0.012);
@@ -298,6 +303,152 @@
     return voice;
   }
 
+  function playPluckedVoice(frequency, at, strength, instrument = state.instrument) {
+    const context = audioContext();
+    if (!state.noiseBuffer) return playVoice(frequency, at, strength, instrument);
+    const pluck = context.createBufferSource();
+    const inputGain = context.createGain();
+    const delay = context.createDelay(0.05);
+    const feedback = context.createGain();
+    const damping = context.createBiquadFilter();
+    const pickup = context.createBiquadFilter();
+    const envelope = context.createGain();
+    const duration = instrument === 'ukulele' ? 0.42 : 0.64;
+    const peak = Math.max(0.0002, 0.28 * strength * (state.dynamics / 100) * currentSectionIntensity());
+    pluck.buffer = state.noiseBuffer;
+    delay.delayTime.setValueAtTime(Math.min(0.05, Math.max(0.0005, 1 / frequency)), at);
+    inputGain.gain.setValueAtTime(0.82, at);
+    feedback.gain.setValueAtTime(0.994, at);
+    damping.type = 'lowpass';
+    damping.frequency.setValueAtTime(instrument === 'ukulele' ? 4300 : 3400, at);
+    pickup.type = 'lowpass';
+    pickup.frequency.setValueAtTime(instrument === 'ukulele' ? 5000 : 4200, at);
+    envelope.gain.setValueAtTime(0.0001, at);
+    envelope.gain.exponentialRampToValueAtTime(peak, at + 0.004);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+    pluck.connect(inputGain);
+    inputGain.connect(delay);
+    delay.connect(feedback);
+    feedback.connect(damping);
+    damping.connect(delay);
+    delay.connect(pickup);
+    pickup.connect(envelope);
+    envelope.connect(context.destination);
+    if (state.convolver) envelope.connect(state.convolver);
+    const voice = { oscillator: pluck, envelope };
+    state.voices.add(voice);
+    pluck.onended = () => state.voices.delete(voice);
+    const burst = Math.min(0.02, Math.max(0.006, (1 / frequency) * 1.5));
+    pluck.start(at, Math.random() * Math.max(0, state.noiseBuffer.duration - burst), burst);
+    return voice;
+  }
+
+  function playDrumNoise(at, strength, { duration = 0.12, type = 'highpass', frequency = 5000 } = {}) {
+    const context = audioContext();
+    if (!state.noiseBuffer) return;
+    const source = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const envelope = context.createGain();
+    const peak = Math.max(0.0002, 0.24 * strength * (state.dynamics / 100) * currentSectionIntensity());
+    source.buffer = state.noiseBuffer;
+    filter.type = type;
+    filter.frequency.setValueAtTime(frequency, at);
+    filter.Q.setValueAtTime(type === 'bandpass' ? 0.8 : 0.7, at);
+    envelope.gain.setValueAtTime(0.0001, at);
+    envelope.gain.exponentialRampToValueAtTime(peak, at + 0.002);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+    source.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(context.destination);
+    if (state.convolver) envelope.connect(state.convolver);
+    const voice = { oscillator: source, envelope };
+    state.voices.add(voice);
+    source.onended = () => state.voices.delete(voice);
+    source.start(at, Math.random() * Math.max(0, state.noiseBuffer.duration - duration), duration);
+    return voice;
+  }
+
+  function playDrumKick(at, strength = 1) {
+    const context = audioContext();
+    const oscillator = context.createOscillator();
+    const envelope = context.createGain();
+    const peak = Math.max(0.0002, 0.3 * strength * (state.dynamics / 100) * currentSectionIntensity());
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(142, at);
+    oscillator.frequency.exponentialRampToValueAtTime(48, at + 0.14);
+    envelope.gain.setValueAtTime(0.0001, at);
+    envelope.gain.exponentialRampToValueAtTime(peak, at + 0.004);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, at + 0.2);
+    oscillator.connect(envelope);
+    envelope.connect(context.destination);
+    if (state.convolver) envelope.connect(state.convolver);
+    const voice = { oscillator, envelope };
+    state.voices.add(voice);
+    oscillator.onended = () => state.voices.delete(voice);
+    oscillator.start(at);
+    oscillator.stop(at + 0.22);
+  }
+
+  function playDrumSnare(at, strength = 0.75) {
+    playDrumNoise(at, strength, { duration: 0.16, type: 'bandpass', frequency: 2100 });
+    const context = audioContext();
+    const oscillator = context.createOscillator();
+    const envelope = context.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(185, at);
+    envelope.gain.setValueAtTime(0.0001, at);
+    envelope.gain.exponentialRampToValueAtTime(0.045 * strength * (state.dynamics / 100), at + 0.003);
+    envelope.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+    oscillator.connect(envelope);
+    envelope.connect(context.destination);
+    const voice = { oscillator, envelope };
+    state.voices.add(voice);
+    oscillator.onended = () => state.voices.delete(voice);
+    oscillator.start(at);
+    oscillator.stop(at + 0.14);
+  }
+
+  function playDrumPattern(position, at) {
+    const rhythm = state.rhythm;
+    const beat = Math.floor(position);
+    const phase = position - beat;
+    const onBeat = phase < 0.001;
+    const onEighth = Math.abs(phase - 0.5) < 0.001;
+    if (rhythm === 'sixEight') {
+      if (onBeat && beat === 0) playDrumKick(at, 0.9);
+      if (Math.abs(position - 1.5) < 0.001) playDrumSnare(at, 0.62);
+      if (onBeat || onEighth) playDrumNoise(at, onBeat ? 0.12 : 0.17, { duration: 0.055, frequency: 6500 });
+      return;
+    }
+    if (rhythm === 'waltz') {
+      if (onBeat && beat === 0) playDrumKick(at, 0.9);
+      if (onBeat && beat === 2) playDrumSnare(at, 0.38);
+      if (onBeat) playDrumNoise(at, 0.13, { duration: 0.06, frequency: 6200 });
+      return;
+    }
+    if (onBeat && (beat === 0 || beat === 2)) playDrumKick(at, beat === 0 ? 0.95 : 0.8);
+    if (onBeat && (beat === 1 || beat === 3)) playDrumSnare(at, beat === 1 ? 0.72 : 0.78);
+    if (onBeat || onEighth) {
+      const accent = rhythm === 'rock' ? 0.18 : 0.13;
+      playDrumNoise(at, onBeat ? accent * 0.7 : accent, { duration: 0.045, frequency: 6800 });
+    }
+  }
+
+  function playBassLine(position, at) {
+    const isSixEight = state.rhythm === 'sixEight';
+    const beat = Math.floor(position);
+    const isBassStep = isSixEight
+      ? Math.abs(position - Math.round(position / 1.5) * 1.5) < 0.001
+      : Math.abs(position - beat) < 0.001;
+    if (!isBassStep) return;
+    const chord = state.chord;
+    const bassRoot = chord.bassPitchClass ?? chord.pitchClass;
+    const pulse = isSixEight ? Math.round(position / 1.5) : beat;
+    const useFifth = pulse % 2 === 1;
+    const midi = 36 + bassRoot + (useFifth ? 7 : 0);
+    playVoice(midiFrequency(midi), at, state.rhythm === 'ballad' ? 0.72 : 0.82, 'bass', { duration: Math.max(0.12, (60 / state.bpm) * 0.86) });
+  }
+
   function releaseVoice(voice) {
     if (!voice || !state.audio) return;
     const at = state.audio.currentTime;
@@ -308,8 +459,27 @@
         voice.envelope.gain.setValueAtTime(Math.max(0.0001, voice.envelope.gain.value), at);
       }
       voice.envelope.gain.setTargetAtTime(0.0001, at, state.reverb ? 0.035 : 0.008);
-      voice.oscillator.stop(at + 0.12);
+      (voice.sources || [voice.oscillator]).forEach(source => source.stop(at + 0.12));
     } catch { /* The note may already have ended. */ }
+  }
+
+  function chordNotes(chord) {
+    if (state.instrument === 'guitar') {
+      const third = chord.quality === 'minor' || chord.quality === 'minorSeventh' ? 3 : 4;
+      const seventh = chord.quality === 'seventh' || chord.quality === 'minorSeventh';
+      const rootMidi = 36 + chord.pitchClass;
+      const offsets = [0, 7, 12, 12 + third, seventh ? 22 : 19, 24];
+      const notes = offsets.map(offset => rootMidi + offset);
+      if (chord.bassPitchClass !== null) {
+        notes.shift();
+        notes.unshift(36 + chord.bassPitchClass);
+      }
+      return notes;
+    }
+    const baseMidi = 60;
+    const notes = chord.intervals.map(interval => baseMidi + chord.pitchClass + interval);
+    if (chord.bassPitchClass !== null) notes.unshift(baseMidi - 12 + chord.bassPitchClass);
+    return notes;
   }
 
   async function startHeldChord(chord, source) {
@@ -320,11 +490,8 @@
       const context = audioContext();
       await context.resume();
       if (state.heldSource !== source) return;
-      const baseMidi = state.instrument === 'guitar' ? 48 : 60;
       const at = context.currentTime + 0.018;
-      const notes = chord.intervals.map(interval => baseMidi + chord.pitchClass + interval);
-      if (chord.bassPitchClass !== null) notes.unshift(baseMidi - 12 + chord.bassPitchClass);
-      state.heldVoices = notes.map(note => playVoice(midiFrequency(note), at, 0.68, state.instrument, { sustain: true }));
+      state.heldVoices = chordNotes(chord).map(note => playVoice(midiFrequency(note), at, 0.68, state.instrument, { sustain: true }));
     } catch (error) {
       if (state.heldSource === source) setStatus(error.message || 'Không khởi tạo được âm thanh.');
     }
@@ -341,25 +508,27 @@
 
   function strum(chord, at, direction = 'down', strength = 0.8) {
     if (!chord) return;
-    const context = audioContext();
-    const baseMidi = state.instrument === 'guitar' ? 48 : 60;
-    const notes = chord.intervals.map(interval => baseMidi + chord.pitchClass + interval);
-    if (chord.bassPitchClass !== null) notes.unshift(baseMidi - 12 + chord.bassPitchClass);
+    const notes = chordNotes(chord);
     if (direction === 'up') notes.reverse();
     if (state.accompaniment === 'arpeggio' && direction !== 'pick') {
       const note = notes[state.arpeggioIndex % notes.length];
       state.arpeggioIndex += 1;
-      playVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
+      if (state.instrument === 'piano') playVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
+      else playPluckedVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
       return;
     }
     if (direction === 'pick') {
       const note = notes[Math.floor(state.stepPosition * 4) % notes.length];
-      playVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
+      if (state.instrument === 'piano') playVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
+      else playPluckedVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
       return;
     }
-    const spread = state.instrument === 'piano' ? 0.008 : 0.016;
-    notes.forEach((note, index) => playVoice(midiFrequency(note), at + index * spread, strength * (index === 0 ? 1 : 0.78), state.instrument));
-    void context;
+    const spread = state.instrument === 'piano' ? 0.008 : state.instrument === 'ukulele' ? 0.014 : 0.022;
+    notes.forEach((note, index) => {
+      const velocity = strength * (index === 0 ? 1 : 0.78);
+      if (state.instrument === 'piano') playVoice(midiFrequency(note), at + index * spread, velocity, state.instrument);
+      else playPluckedVoice(midiFrequency(note), at + index * spread, velocity, state.instrument);
+    });
   }
 
   function currentSectionIntensity() {
@@ -378,9 +547,6 @@
 
   function playAccompanimentHit(hit, at, strength) {
     if (state.accompaniment === 'bassChord' && Number.isInteger(hit.beat) && hit.beat % 2 === 0) {
-      const baseMidi = state.instrument === 'guitar' ? 48 : 60;
-      const bassPitchClass = state.chord.bassPitchClass ?? state.chord.pitchClass;
-      playVoice(midiFrequency(Math.max(36, baseMidi - 12 + bassPitchClass)), at, strength * 0.95, state.instrument);
       strum(state.chord, at + 0.035, hit.direction, strength * 0.62);
       return;
     }
@@ -427,7 +593,7 @@
     updateMeter(beat);
     window.setTimeout(() => {
       if (state.playing) updateMeter();
-    }, Math.max(90, 30000 / state.bpm));
+    }, Math.max(90, (60000 / state.bpm) * 0.85));
   }
 
   function scheduleWindow() {
@@ -451,6 +617,11 @@
       const transition = currentTransitionWindow(pattern);
       const fillTransition = transition.active && state.transition === 'fill';
       const quietTransition = transition.active && ['break', 'stop'].includes(state.transition);
+      if (!quietTransition) {
+        playDrumPattern(position, state.nextStepAt);
+        playBassLine(position, state.nextStepAt);
+      }
+      if (Math.abs(position - Math.round(position)) < 0.001) pulseBeat(Math.min(pattern.beats - 1, Math.round(position) % pattern.beats));
       if (fillTransition) {
         strum(state.chord, state.nextStepAt, 'pick', 0.72);
       } else if (!quietTransition) {
@@ -469,7 +640,6 @@
             state.nextSectionAccent = false;
           }
           playAccompanimentHit({ ...hit, direction }, state.nextStepAt, strength);
-          pulseBeat(Math.min(pattern.beats - 1, Math.floor(hit.beat)));
         }
       }
       state.stepPosition += 0.25;
@@ -493,6 +663,7 @@
     try {
       const context = audioContext();
       await context.resume();
+      releaseHeldChord();
       state.playing = true;
       state.arrangementPlayback = arrangement && state.sequence.length > 0;
       state.sequenceIndex = 0;
@@ -509,8 +680,8 @@
       updatePlayButton();
       updateChordDisplay();
       renderArrangement();
-      if (state.arrangementPlayback) setStatus(`Bắt đầu ${sectionsById[state.sequence[0].section].name} · ${state.chord.name}.`);
-      else setStatus(`${rhythms[state.rhythm].label} · ${state.bpm} BPM · ${state.chord.name}`);
+      if (state.arrangementPlayback) setStatus(`Bắt đầu ${sectionsById[state.sequence[0].section].name} · trống + bass + ${state.instrument} · ${state.chord.name}.`);
+      else setStatus(`${rhythms[state.rhythm].label} · ${state.bpm} BPM · trống + bass + ${state.instrument} · ${state.chord.name}`);
     } catch (error) {
       setStatus(error.message || 'Không khởi tạo được âm thanh.');
     }
@@ -534,14 +705,15 @@
     state.gesture.clear();
     state.pendingSevenSection = false;
     state.gestureHadChord = false;
+    state.keyboardBassPitchClass = null;
     const context = state.audio;
     if (context) {
       const at = context.currentTime;
-      state.voices.forEach(({ oscillator, envelope }) => {
+      state.voices.forEach(voice => {
         try {
-          envelope.gain.cancelScheduledValues(at);
-          envelope.gain.setTargetAtTime(0.0001, at, 0.018);
-          oscillator.stop(at + 0.08);
+          voice.envelope.gain.cancelScheduledValues(at);
+          voice.envelope.gain.setTargetAtTime(0.0001, at, 0.018);
+          (voice.sources || [voice.oscillator]).forEach(source => source.stop(at + 0.08));
         } catch { /* The note may already have ended. */ }
       });
     }
@@ -698,7 +870,12 @@
     const root = roots[0];
     const accidental = state.accidental;
     const chord = makeChord(root, accidental, quality);
-    el('jam-keyboard-feedback').textContent = `Đang giữ ${chord.name}${roots.length === 2 ? ' · nốt thứ hai là bass' : ''} · thả phím để ngắt.`;
+    el('jam-keyboard-feedback').textContent = `Đang giữ ${chord.name}${roots.length === 2 ? ' · nốt thứ hai là bass' : ''}${state.playing ? ' · đổi hợp âm ở nhịp kế.' : ' · thả phím để ngắt.'}`;
+    if (state.playing) {
+      setChord({ root, accidental, quality, playPreview: false });
+      releaseHeldChord('keyboard');
+      return;
+    }
     if (state.heldSource === 'keyboard' && state.heldChord?.name === chord.name && state.heldChord?.pitchClass === chord.pitchClass && state.heldChord?.bassPitchClass === chord.bassPitchClass) return;
     setChord({ root, accidental, quality, playPreview: false });
     startHeldChord(chord, 'keyboard');
@@ -723,6 +900,7 @@
       const source = `pointer:${event.pointerId}`;
       try { button.setPointerCapture(event.pointerId); } catch { /* Capture is optional. */ }
       setChord({ root: button.dataset.root, playPreview: false });
+      if (state.playing) return;
       const chord = makeChord();
       startHeldChord(chord, source);
       announceHeldChord(chord);
@@ -739,7 +917,7 @@
     button.addEventListener('click', event => {
       if (event.detail !== 0) return;
       setChord({ root: button.dataset.root, playPreview: false });
-      playSingleChord(makeChord());
+      if (!state.playing) playSingleChord(makeChord());
     });
   });
   view.querySelectorAll('[data-quality]').forEach(button => button.addEventListener('click', () => setQuality(button.dataset.quality)));
