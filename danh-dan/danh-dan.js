@@ -844,7 +844,15 @@
   }
 
   function isEditable(target) {
-    return target instanceof Element && !!target.closest('input, textarea, select, [contenteditable="true"]');
+    return target instanceof Element && !!target.closest('textarea, [contenteditable="true"], input:not([type="number"]):not([type="range"])');
+  }
+
+  function isSelectFocused(target) {
+    return target instanceof Element && !!target.closest('select');
+  }
+
+  function numericControl(target) {
+    return target instanceof Element ? target.closest('input[type="number"], input[type="range"]') : null;
   }
 
   function isOverlayOpen() {
@@ -1015,7 +1023,14 @@
   el('jam-arrangement-play').addEventListener('click', () => start({ arrangement: true }));
 
   document.addEventListener('keydown', event => {
+    const token = keyboardToken(event);
     if (!view.classList.contains('active') || isOverlayOpen() || isEditable(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
+    const numericInput = numericControl(event.target);
+    if (numericInput) {
+      const chordKey = token && (Object.hasOwn(rootSemitones, token) || token === 'M' || token === 'J' || (state.pressed.size > 0 && (token === '7' || token === '9')));
+      if (!chordKey) return;
+      numericInput.blur();
+    }
     if (event.code === 'Space') {
       event.preventDefault();
       if (!event.repeat) togglePlay();
@@ -1029,23 +1044,24 @@
     }
     const targetButton = event.target instanceof Element && !!event.target.closest('button');
     const targetArrangementKey = event.target instanceof Element && !!event.target.closest('[data-arrangement-key]');
-    if (event.key === 'Enter' && state.sequence.length && !state.playing && !state.pressed.size && (!targetButton || targetArrangementKey)) {
+    const targetSelect = isSelectFocused(event.target);
+    if (event.key === 'Enter' && state.sequence.length && !state.playing && !state.pressed.size && !targetSelect && (!targetButton || targetArrangementKey)) {
       event.preventDefault();
       if (!event.repeat) start({ arrangement: true });
       return;
     }
-    if (event.key === 'Backspace' && state.sequence.length && !state.playing && !state.pressed.size) {
+    if (event.key === 'Backspace' && state.sequence.length && !state.playing && !state.pressed.size && !targetSelect) {
       event.preventDefault();
       if (!event.repeat) undoArrangement();
       return;
     }
-    if (event.key === 'Delete' && state.sequence.length && !state.playing && !state.pressed.size) {
+    if (event.key === 'Delete' && state.sequence.length && !state.playing && !state.pressed.size && !targetSelect) {
       event.preventDefault();
       if (!event.repeat) clearArrangement();
       return;
     }
     const sectionKey = numericArrangementKey(event);
-    if (sectionKey && !state.playing && state.pressed.size === 0) {
+    if (sectionKey && !targetSelect && !state.playing && state.pressed.size === 0) {
       event.preventDefault();
       if (!event.repeat && sectionKey === '7') {
         state.pressed.add('7');
@@ -1058,7 +1074,6 @@
       if (!event.repeat) appendArrangementSection(sectionKey);
       return;
     }
-    const token = keyboardToken(event);
     if (!token) return;
     event.preventDefault();
     if (event.repeat) return;

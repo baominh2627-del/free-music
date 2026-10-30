@@ -1,4 +1,4 @@
-const CACHE='pink-tune-v41';
+const CACHE='pink-tune-v42';
 const CORE=['./','./index.html','./styles.css','./animations.css','./profile.css','./danh-dan/danh-dan.css','./danh-dan/danh-dan.js','./app.js','./manifest.webmanifest','./icon.svg','./supabase-config.js'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(CORE);await self.skipWaiting();})()));
 self.addEventListener('message',event=>{if(event.data?.type==='ACTIVATE_UPDATE')event.waitUntil(self.skipWaiting());});
