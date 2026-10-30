@@ -35,7 +35,7 @@
 .jam-root-key.active{border-color:var(--jam-accent);background:var(--jam-surface-soft);box-shadow:inset 0 0 0 1px var(--jam-accent)}
 .jam-root-key b{font:800 21px/1 var(--display)}
 .jam-root-key kbd{min-width:22px;padding:2px 5px;border:1px solid var(--jam-line);border-radius:5px;background:var(--jam-bg);color:var(--jam-muted);font:700 10px var(--font)}
-.jam-quality-keys{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.jam-quality-keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .jam-quality{display:grid;align-content:center;gap:4px;min-width:0;min-height:61px;padding:7px 5px;border:1px solid var(--jam-line);border-radius:12px;background:var(--jam-surface);color:var(--jam-text)}
 .jam-quality.active{border-color:var(--jam-accent);background:var(--jam-surface-soft);box-shadow:inset 0 0 0 1px var(--jam-accent)}
 .jam-quality b{font-size:12px}
