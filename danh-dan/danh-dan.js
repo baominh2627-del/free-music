@@ -964,7 +964,7 @@
     state.gestureHadChord = false;
     state.keyboardBassPitchClass = null;
     releaseHeldChord('keyboard');
-    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C rồi nhấn M + 7 để tạo Cm7; C + 9 → C9; giữ A rồi nhấn M + J + 7 → AmMaj7; E + 7 + B → E7/B.';
+    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C rồi nhấn M + 7 → Cm7; giữ F rồi nhấn J + 7 → Fmaj7; C + 9 → C9; giữ A rồi nhấn M + J + 7 → AmMaj7; E + 7 + B → E7/B.';
   }
 
   view.addEventListener('pointerdown', event => {
