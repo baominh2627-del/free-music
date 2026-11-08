@@ -964,7 +964,7 @@
     state.gestureHadChord = false;
     state.keyboardBassPitchClass = null;
     releaseHeldChord('keyboard');
-    el('jam-keyboard-feedback').textContent = 'Máy tính: C + M + 7 tạo Cm7; C + 9 tạo C9; A + M + J + 7 tạo AmMaj7; E + 7 + B tạo E7/B.';
+    el('jam-keyboard-feedback').textContent = 'Máy tính: giữ C rồi nhấn M + 7 để tạo Cm7; C + 9 → C9; giữ A rồi nhấn M + J + 7 → AmMaj7; E + 7 + B → E7/B.';
   }
 
   view.addEventListener('pointerdown', event => {
@@ -1184,7 +1184,9 @@
     if (!token || !state.pressed.has(token)) return;
     event.preventDefault();
     state.pressed.delete(token);
-    state.gesture.delete(token);
+    const rootStillHeld = [...state.pressed].some(key => Object.hasOwn(rootSemitones, key));
+    const latchChordModifier = rootStillHeld && ['M', 'J', '7', '9'].includes(token);
+    if (!latchChordModifier) state.gesture.delete(token);
     state.gestureRoots = state.gestureRoots.filter(root => root !== token);
     if (!state.pressed.size) {
       const addFillSection = token === '7' && state.pendingSevenSection && !state.gestureHadChord;
