@@ -83,10 +83,15 @@
     stepPosition: 0,
     pressed: new Set(),
     gesture: new Set(),
+    gestureRoots: [],
     pendingSevenSection: false,
     gestureHadChord: false,
     voices: new Set(),
     heldVoices: [],
+    attackVoices: [],
+    lastAttackAt: 0,
+    holdId: 0,
+    activeHoldId: 0,
     heldSource: null,
     heldChord: null
   };
@@ -239,7 +244,7 @@
       setStatus(`${nextChord.name} sẽ vào ở nhịp kế tiếp.`);
     } else if (playPreview) {
       setStatus(`Đang nghe thử ${state.chord.name}. Bấm Space hoặc “Chạy điệu” để đệm liên tục.`);
-      playSingleChord(state.chord).catch(() => {});
+      playSingleChord(state.chord);
     } else {
       setStatus(`Đã chọn ${state.chord.name}. Chạm nốt gốc để nghe thử.`);
     }
@@ -298,7 +303,7 @@
     filter.connect(envelope);
     envelope.connect(context.destination);
     if (state.convolver) envelope.connect(state.convolver);
-    const voice = { oscillator, envelope, sustained: sustain };
+    const voice = { oscillator, envelope, sustained: sustain, minReleaseAt: at + (sustain ? 0.16 : duration) };
     state.voices.add(voice);
     oscillator.onended = () => state.voices.delete(voice);
     oscillator.start(at);
@@ -452,17 +457,21 @@
     playVoice(midiFrequency(midi), at, state.rhythm === 'ballad' ? 0.72 : 0.82, 'bass', { duration: Math.max(0.12, (60 / state.bpm) * 0.86) });
   }
 
-  function releaseVoice(voice) {
+  function releaseVoice(voice, { immediate = false } = {}) {
     if (!voice || !state.audio) return;
-    const at = state.audio.currentTime;
+    const now = state.audio.currentTime;
+    const releaseAt = immediate ? now : Math.max(now, voice.minReleaseAt || now);
     try {
-      if (typeof voice.envelope.gain.cancelAndHoldAtTime === 'function') voice.envelope.gain.cancelAndHoldAtTime(at);
-      else {
-        voice.envelope.gain.cancelScheduledValues(at);
-        voice.envelope.gain.setValueAtTime(Math.max(0.0001, voice.envelope.gain.value), at);
+      if (releaseAt <= now + 0.002) {
+        if (typeof voice.envelope.gain.cancelAndHoldAtTime === 'function') voice.envelope.gain.cancelAndHoldAtTime(now);
+        else {
+          voice.envelope.gain.cancelScheduledValues(now);
+          voice.envelope.gain.setValueAtTime(Math.max(0.0001, voice.envelope.gain.value), now);
+        }
       }
-      voice.envelope.gain.setTargetAtTime(0.0001, at, state.reverb ? 0.035 : 0.008);
-      (voice.sources || [voice.oscillator]).forEach(source => source.stop(at + 0.12));
+      const decay = immediate ? 0.008 : state.reverb ? 0.055 : 0.022;
+      voice.envelope.gain.setTargetAtTime(0.0001, releaseAt, decay);
+      (voice.sources || [voice.oscillator]).forEach(source => source.stop(releaseAt + decay * 5 + 0.05));
     } catch { /* The note may already have ended. */ }
   }
 
@@ -489,18 +498,27 @@
     return notes;
   }
 
-  async function startHeldChord(chord, source) {
+  function startHeldChord(chord, source) {
+    const holdId = ++state.holdId;
+    const nowPerf = performance.now();
+    if (nowPerf - state.lastAttackAt < 75 && state.attackVoices.length) {
+      state.attackVoices.forEach(voice => releaseVoice(voice, { immediate: true }));
+      state.attackVoices = [];
+    }
     releaseHeldChord();
     state.heldSource = source;
     state.heldChord = chord;
+    state.activeHoldId = holdId;
     try {
       const context = audioContext();
-      await context.resume();
-      if (state.heldSource !== source) return;
-      const at = context.currentTime + 0.018;
-      state.heldVoices = chordNotes(chord).map(note => playVoice(midiFrequency(note), at, 0.68, state.instrument, { sustain: true }));
+      if (context.state !== 'running') context.resume().catch(() => {});
+      const at = context.currentTime + 0.012;
+      state.lastAttackAt = nowPerf;
+      state.attackVoices = strum(chord, at, 'down', 0.88);
+      const notes = chordNotes(chord).map(note => state.instrument === 'guitar' && note < 48 ? note + 12 : note);
+      state.heldVoices = notes.map(note => playVoice(midiFrequency(note), at + 0.01, 0.62, state.instrument, { sustain: true }));
     } catch (error) {
-      if (state.heldSource === source) setStatus(error.message || 'Không khởi tạo được âm thanh.');
+      if (state.activeHoldId === holdId) setStatus(error.message || 'Không khởi tạo được âm thanh.');
     }
   }
 
@@ -510,31 +528,33 @@
     state.heldVoices = [];
     state.heldSource = null;
     state.heldChord = null;
-    voices.forEach(releaseVoice);
+    state.activeHoldId = 0;
+    voices.forEach(voice => releaseVoice(voice));
   }
 
   function strum(chord, at, direction = 'down', strength = 0.8) {
-    if (!chord) return;
+    if (!chord) return [];
     const notes = chordNotes(chord);
     if (direction === 'up') notes.reverse();
     if (state.accompaniment === 'arpeggio' && direction !== 'pick') {
       const note = notes[state.arpeggioIndex % notes.length];
       state.arpeggioIndex += 1;
-      if (state.instrument === 'piano') playVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
-      else playPluckedVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
-      return;
+      return [state.instrument === 'piano'
+        ? playVoice(midiFrequency(note), at, strength * 0.9, state.instrument)
+        : playPluckedVoice(midiFrequency(note), at, strength * 0.9, state.instrument)];
     }
     if (direction === 'pick') {
       const note = notes[Math.floor(state.stepPosition * 4) % notes.length];
-      if (state.instrument === 'piano') playVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
-      else playPluckedVoice(midiFrequency(note), at, strength * 0.9, state.instrument);
-      return;
+      return [state.instrument === 'piano'
+        ? playVoice(midiFrequency(note), at, strength * 0.9, state.instrument)
+        : playPluckedVoice(midiFrequency(note), at, strength * 0.9, state.instrument)];
     }
     const spread = state.instrument === 'piano' ? 0.008 : state.instrument === 'ukulele' ? 0.014 : 0.022;
-    notes.forEach((note, index) => {
+    return notes.map((note, index) => {
       const velocity = strength * (index === 0 ? 1 : 0.78);
-      if (state.instrument === 'piano') playVoice(midiFrequency(note), at + index * spread, velocity, state.instrument);
-      else playPluckedVoice(midiFrequency(note), at + index * spread, velocity, state.instrument);
+      return state.instrument === 'piano'
+        ? playVoice(midiFrequency(note), at + index * spread, velocity, state.instrument)
+        : playPluckedVoice(midiFrequency(note), at + index * spread, velocity, state.instrument);
     });
   }
 
@@ -586,11 +606,11 @@
     return true;
   }
 
-  async function playSingleChord(chord) {
+  function playSingleChord(chord) {
     try {
       const context = audioContext();
-      await context.resume();
-      strum(chord, context.currentTime + 0.025, 'down', 0.9);
+      if (context.state !== 'running') context.resume().catch(() => {});
+      strum(chord, context.currentTime + 0.02, 'down', 0.9);
     } catch (error) {
       setStatus(error.message || 'Không khởi tạo được âm thanh.');
     }
@@ -614,9 +634,11 @@
     const pattern = rhythms[state.rhythm];
     if (state.stepPosition >= pattern.beats) state.stepPosition = 0;
     while (state.nextStepAt < now + 0.11) {
+      let chordChangedOnStep = false;
       if (state.pendingChord && Math.abs(state.stepPosition - Math.round(state.stepPosition)) < 0.001) {
         state.chord = state.pendingChord;
         state.pendingChord = null;
+        chordChangedOnStep = true;
         updateChordDisplay();
         setStatus(`${rhythms[state.rhythm].label} · ${state.bpm} BPM · ${state.chord.name}`);
       }
@@ -647,6 +669,8 @@
             state.nextSectionAccent = false;
           }
           playAccompanimentHit({ ...hit, direction }, state.nextStepAt, strength);
+        } else if (chordChangedOnStep) {
+          playAccompanimentHit({ beat: position, direction: 'down', strength: 0.78 }, state.nextStepAt, 0.78);
         }
       }
       state.stepPosition += 0.25;
@@ -669,7 +693,7 @@
     }
     try {
       const context = audioContext();
-      await context.resume();
+      if (context.state === 'suspended') await context.resume();
       releaseHeldChord();
       state.playing = true;
       state.arrangementPlayback = arrangement && state.sequence.length > 0;
@@ -706,10 +730,13 @@
     if (state.pendingChord) state.chord = state.pendingChord;
     state.pendingChord = null;
     state.heldVoices = [];
+    state.attackVoices = [];
+    state.activeHoldId = 0;
     state.heldSource = null;
     state.heldChord = null;
     state.pressed.clear();
     state.gesture.clear();
+    state.gestureRoots = [];
     state.pendingSevenSection = false;
     state.gestureHadChord = false;
     state.keyboardBassPitchClass = null;
@@ -825,26 +852,33 @@
 
   function numericArrangementKey(event) {
     const match = String(event.code || '').match(/^(?:Digit|Numpad)([1-8])$/);
-    return match?.[1] || null;
+    if (match) return match[1];
+    const key = String(event.key || '');
+    return /^[1-8]$/.test(key) ? key : null;
   }
 
   function setQuality(value) {
     if (!qualities[value]) return;
-    setChord({ quality: value, playPreview: false });
+    setChord({ quality: value, playPreview: !state.playing });
   }
 
   function keyboardToken(event) {
-    const key = String(event.key || '').toUpperCase();
+    const code = String(event.code || '');
+    const codeMatch = code.match(/^Key([A-G]|M|J)$/);
+    if (codeMatch) return codeMatch[1];
+    if (code === 'Digit7' || code === 'Numpad7') return '7';
+    if (code === 'Digit9' || code === 'Numpad9') return '9';
+    const key = String(event.key || '').replace(/đ/gi, 'D').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
     if (Object.hasOwn(rootSemitones, key)) return key;
     if (key === 'M') return 'M';
     if (key === 'J') return 'J';
-    if (key === '7' || event.code === 'Digit7' || event.code === 'Numpad7') return '7';
-    if (key === '9' || event.code === 'Digit9' || event.code === 'Numpad9') return '9';
+    if (key === '7') return '7';
+    if (key === '9') return '9';
     return null;
   }
 
   function isEditable(target) {
-    return target instanceof Element && !!target.closest('textarea, [contenteditable="true"], input:not([type="number"]):not([type="range"])');
+    return target instanceof Element && !!target.closest('textarea, [contenteditable="true"], input:not([type="number"]):not([type="range"]):not([type="button"]):not([type="checkbox"]):not([type="radio"])');
   }
 
   function isSelectFocused(target) {
@@ -852,25 +886,46 @@
   }
 
   function numericControl(target) {
-    return target instanceof Element ? target.closest('input[type="number"], input[type="range"]') : null;
+    return target instanceof Element ? target.closest('input[type="number"]') : null;
+  }
+
+  function nonTextControl(target) {
+    return target instanceof Element ? target.closest('input[type="range"], select') : null;
+  }
+
+  function blurActiveControl() {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && (!view.contains(active) || active.matches('input, select, textarea'))) {
+      active.blur();
+    }
   }
 
   function isOverlayOpen() {
     return !!document.querySelector('dialog[open]') || !el('now-playing-screen').hidden;
   }
 
-  function syncKeyboardChord() {
-    const roots = [...state.pressed].filter(key => Object.hasOwn(rootSemitones, key));
-    if (!roots.length) {
+  function syncKeyboardChord({ phase = 'down' } = {}) {
+    const pressedRoots = [...state.pressed].filter(key => Object.hasOwn(rootSemitones, key));
+    if (!pressedRoots.length) {
       state.keyboardBassPitchClass = null;
       releaseHeldChord('keyboard');
       if (state.pendingSevenSection && state.pressed.has('7')) el('jam-keyboard-feedback').textContent = 'Giữ 7 rồi thêm nốt gốc để tạo hợp âm bảy; thả riêng 7 để thêm Câu nhạc nối.';
       else if (state.pressed.size) el('jam-keyboard-feedback').textContent = `Đang giữ: ${[...state.pressed].join(' + ')} · chờ nốt gốc.`;
       else {
+        state.gesture.clear();
+        state.gestureRoots = [];
         el('jam-keyboard-feedback').textContent = state.reverb ? 'Đã thả phím — hợp âm đang ngân vang.' : 'Thả hết phím — âm đã ngắt.';
         if (state.playing) setStatus(`${(state.pendingChord || state.chord).name} tiếp tục theo điệu đệm.`);
         else setStatus(state.reverb ? 'Đã thả hợp âm; âm vang đang ngân.' : 'Đã thả hợp âm; âm đã ngắt.');
       }
+      return;
+    }
+    const orderedRoots = state.gestureRoots.filter(key => state.pressed.has(key));
+    const roots = orderedRoots.length ? orderedRoots : pressedRoots;
+    if (phase === 'up' && (state.heldChord || state.playing) && roots.length <= 2) {
+      const primaryRoot = state.gestureRoots[0] || roots[0];
+      if (primaryRoot && state.pressed.has(primaryRoot)) return;
+      releaseHeldChord('keyboard');
       return;
     }
     if (roots.length > 2) {
@@ -881,10 +936,10 @@
       return;
     }
     state.keyboardBassPitchClass = roots.length === 2 ? rootSemitones[roots[1]] : null;
-    const minor = state.pressed.has('M');
-    const seventh = state.pressed.has('7');
-    const majorSeventh = state.pressed.has('J') && seventh;
-    const ninth = state.pressed.has('9');
+    const minor = state.gesture.has('M') || state.pressed.has('M');
+    const seventh = state.gesture.has('7') || state.pressed.has('7');
+    const majorSeventh = (state.gesture.has('J') || state.pressed.has('J')) && seventh;
+    const ninth = state.gesture.has('9') || state.pressed.has('9');
     const quality = ninth ? 'ninth' : majorSeventh ? minor ? 'minorMajorSeventh' : 'majorSeventh' : minor ? seventh ? 'minorSeventh' : 'minor' : seventh ? 'seventh' : 'major';
     const root = roots[0];
     const accidental = state.accidental;
@@ -904,6 +959,7 @@
   function clearGesture() {
     state.pressed.clear();
     state.gesture.clear();
+    state.gestureRoots = [];
     state.pendingSevenSection = false;
     state.gestureHadChord = false;
     state.keyboardBassPitchClass = null;
@@ -911,10 +967,15 @@
     el('jam-keyboard-feedback').textContent = 'Máy tính: C + M + 7 tạo Cm7; C + 9 tạo C9; A + M + J + 7 tạo AmMaj7; E + 7 + B tạo E7/B.';
   }
 
+  view.addEventListener('pointerdown', event => {
+    if (event.target instanceof Element && !event.target.closest('input, select, textarea')) blurActiveControl();
+  });
+
   view.querySelectorAll('[data-root]').forEach(button => {
     button.addEventListener('pointerdown', event => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       event.preventDefault();
+      blurActiveControl();
       state.keyboardBassPitchClass = null;
       const source = `pointer:${event.pointerId}`;
       try { button.setPointerCapture(event.pointerId); } catch { /* Capture is optional. */ }
@@ -946,6 +1007,7 @@
     setChord({ playPreview: false });
     if (state.pressed.size) syncKeyboardChord();
     if (!state.playing && !state.pressed.size) setStatus(state.bassPitchClass === null ? `Đã bỏ nốt bass riêng. Chạm nốt gốc để phát ${state.chord.name}.` : `Đã chọn bass ${chromaticNames[state.bassPitchClass]}. Chạm nốt gốc để phát ${state.chord.name}.`);
+    event.target.blur();
   });
   const adjustPitchSetting = (setting, amount) => {
     if (setting === 'toneShift') state.toneShift = Math.max(-12, Math.min(12, state.toneShift + amount));
@@ -961,10 +1023,10 @@
   el('jam-capo-up').addEventListener('click', () => adjustPitchSetting('capo', 1));
   view.querySelectorAll('[data-accidental]').forEach(button => button.addEventListener('click', () => {
     const accidental = Number(button.dataset.accidental);
-    setChord({ accidental, playPreview: false });
+    setChord({ accidental, playPreview: !state.playing });
     updateSettingsUI();
     savePrefs();
-    if (!state.playing) setStatus(`Dấu hóa ${button.textContent.trim()} đã chọn. Chạm nốt gốc để phát ${state.chord.name}.`);
+    if (!state.playing) setStatus(`Dấu hóa ${button.textContent.trim()} đã chọn. Đang nghe thử ${state.chord.name}.`);
   }));
   view.querySelectorAll('[data-theme]').forEach(button => button.addEventListener('click', () => {
     state.theme = button.dataset.theme;
@@ -974,19 +1036,24 @@
   el('jam-play-toggle').addEventListener('click', togglePlay);
   el('jam-stop').addEventListener('click', () => stop());
   el('jam-reverb-toggle').addEventListener('click', () => setReverb(!state.reverb));
-  el('jam-rhythm').addEventListener('change', event => setRhythm(event.target.value));
+  el('jam-rhythm').addEventListener('change', event => {
+    setRhythm(event.target.value);
+    event.target.blur();
+  });
   el('jam-pattern').addEventListener('change', event => {
     if (!accompanimentModes.includes(event.target.value)) return;
     state.accompaniment = event.target.value;
     state.arpeggioIndex = 0;
     savePrefs();
     setStatus(`Đã chọn mẫu đệm: ${event.target.options[event.target.selectedIndex].text}.`);
+    event.target.blur();
   });
   el('jam-transition').addEventListener('change', event => {
     if (!transitionModes.includes(event.target.value)) return;
     state.transition = event.target.value;
     savePrefs();
     setStatus(`Kiểu chuyển đoạn: ${event.target.options[event.target.selectedIndex].text}.`);
+    event.target.blur();
   });
   el('jam-variation-toggle').addEventListener('click', () => {
     state.variation = !state.variation;
@@ -999,14 +1066,16 @@
     el('jam-dynamics-value').textContent = `${state.dynamics}%`;
     savePrefs();
   });
+  el('jam-dynamics').addEventListener('change', event => event.target.blur());
   el('jam-instrument').addEventListener('change', event => {
     state.instrument = event.target.value;
     savePrefs();
+    event.target.blur();
   });
   el('jam-tempo').addEventListener('change', event => setTempo(event.target.value || state.bpm));
   el('jam-tempo-down').addEventListener('click', () => setTempo(state.bpm - 5));
   el('jam-tempo-up').addEventListener('click', () => setTempo(state.bpm + 5));
-  el('jam-arrangement-keypad').addEventListener('click', event => {
+  (el('jam-arrangement-keypad') || view.querySelector('.jam-arrangement-keypad'))?.addEventListener('click', event => {
     const button = event.target.closest('[data-arrangement-key]');
     if (button) appendArrangementSection(button.dataset.arrangementKey);
   });
@@ -1024,12 +1093,29 @@
 
   document.addEventListener('keydown', event => {
     const token = keyboardToken(event);
+    const sectionKey = numericArrangementKey(event);
     if (!view.classList.contains('active') || isOverlayOpen() || isEditable(event.target) || event.ctrlKey || event.metaKey || event.altKey) return;
     const numericInput = numericControl(event.target);
     if (numericInput) {
-      const chordKey = token && (Object.hasOwn(rootSemitones, token) || token === 'M' || token === 'J' || (state.pressed.size > 0 && (token === '7' || token === '9')));
-      if (!chordKey) return;
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        setTempo(numericInput.value || state.bpm);
+        numericInput.blur();
+        return;
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        numericInput.value = String(state.bpm);
+        numericInput.blur();
+        return;
+      }
+      const exitNumeric = event.code === 'Space' || (token && (Object.hasOwn(rootSemitones, token) || token === 'M' || token === 'J' || (state.pressed.size > 0 && (token === '7' || token === '9'))));
+      if (!exitNumeric) return;
       numericInput.blur();
+    }
+    const controlElement = nonTextControl(event.target);
+    if (controlElement && (event.code === 'Space' || event.key === 'Escape' || event.key === 'Enter' || event.key === 'Backspace' || event.key === 'Delete' || sectionKey || token)) {
+      controlElement.blur();
     }
     if (event.code === 'Space') {
       event.preventDefault();
@@ -1044,7 +1130,7 @@
     }
     const targetButton = event.target instanceof Element && !!event.target.closest('button');
     const targetArrangementKey = event.target instanceof Element && !!event.target.closest('[data-arrangement-key]');
-    const targetSelect = isSelectFocused(event.target);
+    const targetSelect = isSelectFocused(document.activeElement);
     if (event.key === 'Enter' && state.sequence.length && !state.playing && !state.pressed.size && !targetSelect && (!targetButton || targetArrangementKey)) {
       event.preventDefault();
       if (!event.repeat) start({ arrangement: true });
@@ -1060,15 +1146,16 @@
       if (!event.repeat) clearArrangement();
       return;
     }
-    const sectionKey = numericArrangementKey(event);
     if (sectionKey && !targetSelect && !state.playing && state.pressed.size === 0) {
       event.preventDefault();
       if (!event.repeat && sectionKey === '7') {
+        state.gesture.clear();
+        state.gestureRoots = [];
         state.pressed.add('7');
         state.gesture.add('7');
         state.pendingSevenSection = true;
         state.gestureHadChord = false;
-        syncKeyboardChord();
+        syncKeyboardChord({ phase: 'down' });
         return;
       }
       if (!event.repeat) appendArrangementSection(sectionKey);
@@ -1077,10 +1164,18 @@
     if (!token) return;
     event.preventDefault();
     if (event.repeat) return;
+    if (state.pressed.size === 0 || state.pressed.has(token)) {
+      state.pressed.clear();
+      state.gesture.clear();
+      state.gestureRoots = [];
+    }
     state.pressed.add(token);
     state.gesture.add(token);
-    if (Object.hasOwn(rootSemitones, token) || token === 'M') state.gestureHadChord = true;
-    syncKeyboardChord();
+    if (Object.hasOwn(rootSemitones, token) && !state.gestureRoots.includes(token)) {
+      state.gestureRoots.push(token);
+    }
+    if (Object.hasOwn(rootSemitones, token) || token === 'M' || token === 'J' || token === '9') state.gestureHadChord = true;
+    syncKeyboardChord({ phase: 'down' });
   });
 
   document.addEventListener('keyup', event => {
@@ -1090,11 +1185,14 @@
     event.preventDefault();
     state.pressed.delete(token);
     state.gesture.delete(token);
+    state.gestureRoots = state.gestureRoots.filter(root => root !== token);
     if (!state.pressed.size) {
       const addFillSection = token === '7' && state.pendingSevenSection && !state.gestureHadChord;
       state.pendingSevenSection = false;
       state.gestureHadChord = false;
       if (addFillSection && !isOverlayOpen()) {
+        state.gesture.clear();
+        state.gestureRoots = [];
         appendArrangementSection('7');
         return;
       }
@@ -1102,11 +1200,22 @@
     if (isOverlayOpen()) {
       releaseHeldChord('keyboard');
       el('jam-keyboard-feedback').textContent = 'Đã ngắt hợp âm khi một cửa sổ đang mở.';
-    } else syncKeyboardChord();
+    } else syncKeyboardChord({ phase: 'up' });
+  });
+
+  document.querySelectorAll('[data-view="danh-dan"]').forEach(button => {
+    button.addEventListener('click', () => {
+      try {
+        const context = audioContext();
+        if (context.state !== 'running') context.resume().catch(() => {});
+      } catch { /* Audio will initialize on next interaction. */ }
+    });
   });
 
   const viewObserver = new MutationObserver(() => {
-    if (!view.classList.contains('active')) {
+    if (view.classList.contains('active')) {
+      blurActiveControl();
+    } else {
       if (state.playing) stop({ silent: true });
       else releaseHeldChord();
       clearGesture();
@@ -1122,6 +1231,7 @@
   window.addEventListener('blur', () => {
     state.pressed.clear();
     state.gesture.clear();
+    state.gestureRoots = [];
     state.keyboardBassPitchClass = null;
     state.pendingSevenSection = false;
     state.gestureHadChord = false;
