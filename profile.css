@@ -765,3 +765,32 @@
   .delete-playlist-status { font-size: 14px; }
   .delete-playlist-actions button { min-height: 52px; font-size: 15px; }
 }
+
+/* Home playlists + community shuffle. Mobile-first. */
+.home-playlists-heading{margin-top:8px}
+.home-playlist-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.home-playlist-card{display:flex;align-items:center;gap:6px;min-width:0;border:1px solid #f0dce4;border-radius:12px;background:#fffafd}
+.home-playlist-open{display:flex;flex:1;align-items:center;gap:11px;min-width:0;min-height:64px;padding:8px 4px 8px 8px;border-radius:12px;background:transparent;color:var(--text);text-align:left}
+.home-playlist-open .playlist-card-art{overflow:hidden}
+.home-playlist-copy{flex:1;min-width:0}
+.home-playlist-copy b,.home-playlist-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-playlist-copy b{font-size:14px}
+.home-playlist-copy small{margin-top:4px;color:var(--muted);font-size:11px}
+.home-playlist-play{flex:0 0 44px;width:44px;height:44px;margin-right:9px;border-radius:50%;background:#e9a8c1;color:#563b48;font-size:14px;padding-left:3px}
+.home-playlist-play:disabled{opacity:.4;cursor:default}
+.home-playlist-create{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border:1px dashed #e2b3c7;border-radius:12px;background:transparent;color:#a45675;font-size:13px;font-weight:700}
+.playlist-card-art img{border-radius:inherit}
+.community-heading{flex-wrap:wrap;gap:8px 10px}
+.community-heading-copy{flex:1;min-width:0}
+.community-shuffle-button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 16px;border-radius:23px;background:linear-gradient(120deg,#e9a8c1,#d98dad);color:#4f3040;font-size:13px;font-weight:800;box-shadow:0 6px 16px #bf5d8226}
+.community-shuffle-button .shuffle-icon{font-size:18px}
+.community-shuffle-button .shuffle-meta{font-size:11px;font-weight:600;opacity:.75}
+.community-shuffle-button:disabled{opacity:.5;cursor:default}
+.community-shuffle-button.is-active{background:#bf5d82;color:#fff}
+.community-heading .community-shuffle-button{flex:1 1 100%;order:3}
+.community-library-heading{flex-wrap:wrap;gap:8px 10px}
+.community-library-heading .community-shuffle-button{flex:1 1 100%;order:3}
+@media(min-width:700px){
+  .home-playlist-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .community-heading .community-shuffle-button,.community-library-heading .community-shuffle-button{flex:0 0 auto;order:0;min-height:40px;font-size:12px}
+}
