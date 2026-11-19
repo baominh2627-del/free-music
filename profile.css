@@ -794,3 +794,7 @@
   .home-playlist-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
   .community-heading .community-shuffle-button,.community-library-heading .community-shuffle-button{flex:0 0 auto;order:0;min-height:40px;font-size:12px}
 }
+
+.full-track-actions{display:flex;align-items:center;gap:2px;flex:0 0 auto}.full-download-button{font-size:24px;min-width:44px;min-height:44px;color:#704b5c}.full-download-button.is-done{color:#4f8a58}.full-download-button:disabled{opacity:.8;cursor:default}
+
+.player-bar .player-download{font-size:20px;min-width:36px;min-height:36px;color:#8f6477}.player-bar .player-download.is-done{color:#4f8a58}.player-bar .player-download:disabled{opacity:.8;cursor:default}@media(max-width:600px){.player-bar .player-download:not([hidden]){display:grid;place-items:center;flex:0 0 40px;width:40px;height:44px;margin-right:56px;padding:0}}@media (display-mode:standalone) and (max-width:600px){.player-bar .player-download:not([hidden]){margin-right:70px}}
