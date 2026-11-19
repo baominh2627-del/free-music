@@ -29,6 +29,9 @@ function titleFromFile(name){const base=name.replace(/\.[^.]+$/,'');return base.
 function trackById(trackId){return state.downloads.find(t=>t.id===trackId)||state.tracks.find(t=>t.id===trackId)||state.sharedTracks.find(t=>t.id===trackId);}
 function allTracks(){const ids=[...new Set([...state.sharedTracks,...state.tracks,...state.downloads].map(track=>track.id))];return ids.map(trackById).filter(Boolean);}
 function isDownloaded(track){return !!track&&(!!track.blob||state.downloads.some(item=>item.id===track.id)||state.tracks.some(item=>item.id===track.id&&!!item.blob));}
+async function fetchCoverBlob(url){if(!url)return null;try{const response=await fetch(url);if(!response.ok)return null;const blob=await response.blob();return blob.size&&blob.type.startsWith('image/')?blob:null;}catch{return null;}}
+function prepareDownloadCovers(){for(const item of state.downloads){if(item.coverBlob)item.coverUrl=URL.createObjectURL(item.coverBlob);else if(String(item.coverUrl||'').startsWith('blob:'))item.coverUrl=item.remoteCoverUrl||'';}}
+async function backfillDownloadCovers(){if(!navigator.onLine)return;let changed=false;for(const item of state.downloads){if(item.coverBlob)continue;const url=item.remoteCoverUrl||item.coverUrl;if(!/^https?:/.test(url||''))continue;const blob=await fetchCoverBlob(url);if(!blob)continue;item.remoteCoverUrl=url;item.coverBlob=blob;item.coverUrl=URL.createObjectURL(blob);try{await putDownload(item);changed=true;}catch{}}if(changed)render();}
 async function downloadTrack(trackId,{silent=false}={}){
   if(isDownloaded(trackById(trackId)))return 'already';
   if(state.downloadJobs.has(trackId))return state.downloadJobs.get(trackId);
@@ -41,7 +44,8 @@ async function downloadTrack(trackId,{silent=false}={}){
       if(!response.ok)throw new Error(`Máy chủ trả về lỗi ${response.status}.`);
       const blob=await response.blob();
       if(!blob.size)throw new Error('Tệp nhạc tải về đang trống.');
-      const downloaded={...source,blob,isDownloaded:true,downloadedAt:Date.now()};
+      const coverBlob=await fetchCoverBlob(source.coverUrl);
+      const downloaded={...source,blob,coverBlob,remoteCoverUrl:source.coverUrl||'',coverUrl:coverBlob?URL.createObjectURL(coverBlob):source.coverUrl,isDownloaded:true,downloadedAt:Date.now()};
       await putDownload(downloaded);
       state.downloads.push(downloaded);
       render();
@@ -496,7 +500,7 @@ if('serviceWorker'in navigator&&location.protocol!=='file:'){
     registration.update().catch(()=>{});
   }).catch(()=>{});
 }
-openDB().then(async db=>{state.db=db;state.tracks=await getTracks();state.downloads=await getDownloads();state.tracks.sort((a,b)=>a.addedAt-b.addedAt);state.playHistory=parseStoredArray(historyStorageKey());await loadPlaylists();render();}).catch(()=>toast('Không thể mở thư viện lưu trên thiết bị.'));
+openDB().then(async db=>{state.db=db;state.tracks=await getTracks();state.downloads=await getDownloads();prepareDownloadCovers();backfillDownloadCovers().catch(()=>{});state.tracks.sort((a,b)=>a.addedAt-b.addedAt);state.playHistory=parseStoredArray(historyStorageKey());await loadPlaylists();render();}).catch(()=>toast('Không thể mở thư viện lưu trên thiết bị.'));
 // Wait for supabase CDN to load (it uses defer, may finish after app.js)
 function waitForSupabaseThenInit(retries=20){console.log('[PinkTune] waitForSupabaseThenInit retries='+retries+' supabase='+(!!window.supabase?.createClient));if(window.supabase?.createClient){initCloud().then(()=>{if(!state.supabase){state.accountReady=true;renderProfile();}}).catch((e)=>{console.error('[PinkTune] initCloud promise rejected:',e);state.accountReady=true;renderProfile();});}else if(retries>0){setTimeout(()=>waitForSupabaseThenInit(retries-1),200);}else{console.error('[PinkTune] Gave up waiting for supabase CDN');state.accountReady=true;showCloudLogin('Không tải được thư viện Supabase. Kiểm tra kết nối Internet rồi tải lại trang.');els['cloud-retry'].hidden=false;renderProfile();}}
 waitForSupabaseThenInit();
