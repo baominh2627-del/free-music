@@ -588,24 +588,17 @@
 .profile-button img:not([hidden]) + span,
 .profile-avatar-large img:not([hidden]) + span { display: none !important; }
 @media (max-width: 600px) {
-  #library-list .track-row { grid-template-columns: 44px minmax(0, 1fr) 76px; gap: 8px; min-height: 68px; height: auto; padding: 8px; }
-  #library-list .track-number { display: none; }
-  #library-list .track-cover { grid-column: 1; grid-row: 1; }
-  #library-list .track-title { grid-column: 2; grid-row: 1; }
-  #library-list .row-actions { grid-column: 3; grid-row: 1; display: flex; gap: 0; justify-content: flex-end; }
-  #library-list .row-actions .icon-action { width: 36px; min-width: 36px; height: 42px; padding: 0; font-size: 18px; }
-  /* Community tracks need a full-width row on phones so artwork and copy
-     never compete for the narrow two-column card width. */
+  /* Community tracks need a full-width row on phones so artwork, copy, and actions stay balanced. */
   .community-list { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .community-list .track-row {
     display: grid;
-    grid-template-columns: 56px minmax(0, 1fr) 40px;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
     grid-template-areas: "cover copy actions";
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
     min-width: 0;
-    min-height: 78px;
+    min-height: 76px;
     height: auto;
     padding: 8px;
   }
@@ -614,9 +607,9 @@
   .community-list .track-duration { display: none !important; }
   .community-list .track-cover {
     grid-area: cover;
-    width: 56px;
-    height: 56px;
-    min-width: 56px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
     margin: 0;
   }
   .community-list .track-title {
@@ -626,14 +619,9 @@
     overflow: hidden;
     text-align: left;
   }
-  .community-list .row-actions { grid-area: actions; display: flex !important; flex-direction: column; gap: 2px; justify-content: center; }
-  .community-list .row-actions .icon-action { display: grid; place-items: center; width: 40px; height: 38px; padding: 0; font-size: 20px; }
-  #playlist-detail-list .track-row { grid-template-columns: 44px minmax(0, 1fr) 96px; gap: 8px; padding: 8px; }
-  #playlist-detail-list .track-number { display: none; }
-  #playlist-detail-list .track-cover { grid-column: 1; grid-row: 1; }
-  #playlist-detail-list .track-title { grid-column: 2; grid-row: 1; }
-  #playlist-detail-list .row-actions { grid-column: 3; grid-row: 1; display: flex; gap: 0; }
-  #playlist-detail-list .row-actions .icon-action { width: 32px; min-width: 32px; height: 42px; padding: 0; font-size: 17px; }
+  .community-list .row-actions { grid-area: actions; display: flex !important; flex-direction: row; align-items: center; gap: 0; justify-content: flex-end; }
+  .community-list .row-actions .icon-action { display: grid; place-items: center; flex: 0 0 32px; width: 32px; min-width: 32px; height: 42px; padding: 0; font-size: 18px; }
+  .community-list .row-actions .track-more-action { font-size: 24px; }
   .community-list .track-title b {
     display: block;
     overflow: hidden;
@@ -726,8 +714,9 @@
 .track-action-create-form label { color: var(--muted); font-size: 12px; font-weight: 600; }
 .track-action-create-form input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #e9cbd8; border-radius: 9px; background: #fffafd; color: var(--text); }
 .track-action-create-form .primary-button { min-height: 46px; }
-#liked-list .track-row[data-long-press-actions], #playlist-detail-list .track-row[data-long-press-actions] { grid-template-columns: 32px 44px minmax(120px, 1fr) minmax(80px, .7fr) 42px 112px; gap: 9px; }
-#liked-list .track-row[data-long-press-actions] .row-actions, #playlist-detail-list .track-row[data-long-press-actions] .row-actions { gap: 0; min-width: 0; }
+.full-list:not(.community-list) .track-row[data-long-press-actions] { grid-template-columns: 32px 44px minmax(120px, 1fr) minmax(80px, .7fr) 42px minmax(108px, auto); gap: 9px; }
+.track-row[data-long-press-actions] .row-actions { gap: 0; min-width: 0; }
+.track-row[data-long-press-actions] .row-actions .icon-action { display: grid; place-items: center; min-width: 32px; height: 40px; padding: 0; }
 .track-more-action { display: grid; flex: 0 0 36px; place-items: center; width: 36px; min-width: 36px; height: 42px; padding: 0; color: #a45675; font-size: 24px; line-height: 1; }
 .track-more-action:hover, .track-more-action:focus-visible { background: #f8e5ed; color: #843c5c; border-radius: 8px; }
 @media (max-width: 600px) {
@@ -736,14 +725,20 @@
   .liked-toolbar > .muted { flex: 1 1 calc(100% - 155px); }
   .liked-add-toggle { min-height: 42px; padding: 9px 11px; font-size: 11px; }
   .track-actions-dialog { padding: 18px 16px; }
-  #liked-list .track-row[data-long-press-actions], #playlist-detail-list .track-row[data-long-press-actions] { grid-template-columns: 44px minmax(0, 1fr) 104px; gap: 7px; min-height: 68px; height: auto; padding: 8px; }
-  #liked-list .track-row[data-long-press-actions] .track-number, #playlist-detail-list .track-row[data-long-press-actions] .track-number { display: none; }
-  #liked-list .track-row[data-long-press-actions] .track-cover, #playlist-detail-list .track-row[data-long-press-actions] .track-cover { grid-column: 1; grid-row: 1; width: 44px; height: 44px; }
-  #liked-list .track-row[data-long-press-actions] .track-title, #playlist-detail-list .track-row[data-long-press-actions] .track-title { grid-column: 2; grid-row: 1; }
-  #liked-list .track-row[data-long-press-actions] .track-album, #liked-list .track-row[data-long-press-actions] .track-duration, #playlist-detail-list .track-row[data-long-press-actions] .track-album, #playlist-detail-list .track-row[data-long-press-actions] .track-duration { display: none; }
-  #liked-list .track-row[data-long-press-actions] .row-actions, #playlist-detail-list .track-row[data-long-press-actions] .row-actions { grid-column: 3; grid-row: 1; display: flex; justify-content: flex-end; gap: 0; }
-  #liked-list .track-row[data-long-press-actions] .row-actions .icon-action, #playlist-detail-list .track-row[data-long-press-actions] .row-actions .icon-action { flex: 0 0 34px; width: 34px; min-width: 34px; height: 42px; padding: 0; font-size: 18px; }
-  #liked-list .track-row[data-long-press-actions] .row-actions .track-more-action, #playlist-detail-list .track-row[data-long-press-actions] .row-actions .track-more-action { font-size: 24px; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 7px; min-height: 68px; height: auto; padding: 8px; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .track-number { display: none; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .track-cover { grid-column: 1; grid-row: 1; width: 44px; height: 44px; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .track-title { grid-column: 2; grid-row: 1; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .track-album, .full-list:not(.community-list) .track-row[data-long-press-actions] .track-duration { display: none; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .row-actions { grid-column: 3; grid-row: 1; display: flex; justify-content: flex-end; gap: 0; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .row-actions .icon-action { flex: 0 0 34px; width: 34px; min-width: 34px; height: 42px; padding: 0; font-size: 18px; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .row-actions .track-more-action { font-size: 24px; }
+}
+@media (max-width: 360px) {
+  .community-list .track-row { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 6px; padding: 8px 6px; }
+  .community-list .track-cover { width: 44px; height: 44px; min-width: 44px; }
+  .community-list .row-actions .icon-action { flex-basis: 30px; width: 30px; min-width: 30px; }
+  .full-list:not(.community-list) .track-row[data-long-press-actions] .row-actions .icon-action { flex-basis: 31px; width: 31px; min-width: 31px; }
 }
 
 .delete-playlist-dialog { width: min(460px, calc(100vw - 28px)); max-height: min(86dvh, 680px); margin: auto; overflow: auto; padding: 28px 26px 24px; border: 1px solid #e9c4d3; border-radius: 20px; background: #fffafd; color: #583e4b; text-align: center; box-shadow: 0 24px 90px #76475d38; }
